@@ -535,21 +535,32 @@
      */
     function loadDashboardData() {
       if (isFirebaseConfigured && db) {
-        // Firebase Firestoreから読み込み
-        db.collection("exam_records").orderBy("timestamp", "desc").get()
+        // Firebase Firestoreからインデックス無しの単純ロードを行い、JS側でソートして確実に動かします
+        db.collection("exam_records").get()
           .then(querySnapshot => {
             const records = [];
             querySnapshot.forEach(doc => {
-              const data = doc.data();
-              // Firestore の Timestamp オブジェクトをパース
+              records.push(doc.data());
+            });
+
+            // JS側で日付ソート (降順)
+            records.sort((a, b) => {
+              const timeA = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp || 0);
+              const timeB = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp || 0);
+              return timeB - timeA;
+            });
+
+            // 表示用に日付文字列をフォーマット
+            records.forEach(data => {
               if (data.timestamp && data.timestamp.toDate) {
                 const date = data.timestamp.toDate();
                 data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
               } else {
-                data.timestampString = new Date(data.timestamp || Date.now()).toLocaleString('ja-JP');
+                const date = new Date(data.timestamp || Date.now());
+                data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
               }
-              records.push(data);
             });
+
             processAndRender(records);
           })
           .catch(err => {
