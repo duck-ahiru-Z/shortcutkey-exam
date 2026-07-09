@@ -535,8 +535,8 @@
      */
     function loadDashboardData() {
       if (isFirebaseConfigured && db) {
-        // Firebase Firestoreからインデックス無しの単純ロードを行い、JS側でソートして確実に動かします
-        db.collection("exam_records").get()
+        // Firebase Firestoreから直近100件のみを取得して読み込み回数(Read)を劇的に削減します (最大100Read制限)
+        db.collection("exam_records").limit(100).get()
           .then(querySnapshot => {
             const records = [];
             querySnapshot.forEach(doc => {
@@ -545,16 +545,30 @@
 
             // JS側で日付ソート (降順)
             records.sort((a, b) => {
-              const timeA = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp || 0);
-              const timeB = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp || 0);
-              return timeB - timeA;
+              const parseTime = (ts) => {
+                if (!ts) return 0;
+                if (ts && typeof ts.toDate === 'function') {
+                  try {
+                    return ts.toDate().getTime();
+                  } catch (e) {
+                    return 0;
+                  }
+                }
+                const d = new Date(ts);
+                return isNaN(d.getTime()) ? 0 : d.getTime();
+              };
+              return parseTime(b.timestamp) - parseTime(a.timestamp);
             });
 
             // 表示用に日付文字列をフォーマット
             records.forEach(data => {
-              if (data.timestamp && data.timestamp.toDate) {
-                const date = data.timestamp.toDate();
-                data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+              if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+                try {
+                  const date = data.timestamp.toDate();
+                  data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                } catch(e) {
+                  data.timestampString = "処理中...";
+                }
               } else {
                 const date = new Date(data.timestamp || Date.now());
                 data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
