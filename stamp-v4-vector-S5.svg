@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+    <defs></defs>
+    <g transform="rotate(, 400, 400)" >
+        <!-- 外枠 -->
+        <path d="M 85 40 L 715 40 Q 760 40 760 85 L 760 715 Q 760 760 715 760 L 85 760 Q 40 760 40 715 L 40 85 Q 40 40 85 40 Z" style="fill:none; stroke:#c9171e; stroke-width:14px;" />
+        <!-- 内枠 -->
+        <path d="M 85 55 L 715 55 Q 745 55 745 85 L 745 715 Q 745 745 715 745 L 85 745 Q 55 745 55 715 L 55 85 Q 55 55 85 55 Z" style="fill:none; stroke:#c9171e; stroke-width:4px;" />
+        
+        <!-- メインテキスト -->
+        <text x="400" y="95" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:55px; font-weight:900; font-style:normal; text-anchor:middle; dominant-baseline:hanging;"></text>
+        <text x="400" y="710" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:70px; font-weight:900; font-style:normal; text-anchor:middle; dominant-baseline:baseline;"></text>
+        
+        <!-- 自由追加テキスト A -->
+        <text x="400" y="150" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:55px; font-weight:900; text-anchor:middle; dominant-baseline:central;">ショートカットキー検定</text>
+        
+        <!-- 自由追加テキスト B -->
+        <text x="400" y="640" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:70px; font-weight:900; text-anchor:middle; dominant-baseline:central;">運営事務局之認定印</text>
+
+        <!-- 配色完全独立式中央シールド -->
+        <g>
+            <path d="M 320 336 Q 400 320 480 336 L 480 416 Q 480 480 400 512 Q 320 480 320 416 Z" style="fill:#c91818; stroke:#c9171e; stroke-width:12.8px;" />
+            <text x="400" y="420" style="fill:#ffffff; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:82px; font-weight:900; text-anchor:middle; dominant-baseline:central;">S5</text>
+        </g>
+        
+        <!-- 周辺マウントキーキャップ群 -->
+        
+        <!-- Keycap Shift -->
+        <path d="M 187.8 257.5 L 242.2 257.5 Q 257.5 257.5 257.5 272.8 L 257.5 327.2 Q 257.5 342.5 242.2 342.5 L 187.8 342.5 Q 172.5 342.5 172.5 327.2 L 172.5 272.8 Q 172.5 257.5 187.8 257.5 Z" style="fill:none; stroke:#c9171e; stroke-width:6.0px;" />
+        <path d="M 189.5 264.3 L 240.5 264.3 Q 250.7 264.3 250.7 274.5 L 250.7 325.5 Q 250.7 335.7 240.5 335.7 L 189.5 335.7 Q 179.3 335.7 179.3 325.5 L 179.3 274.5 Q 179.3 264.3 189.5 264.3 Z" style="fill:none; stroke:#c9171e; stroke-width:2.5px; opacity:0.22;" />
+        <text x="215" y="300" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:34px; font-weight:bold; text-anchor:middle; dominant-baseline:central;">Shift</text>
+        
+        <!-- Keycap Ctrl -->
+        <path d="M 187.8 457.5 L 242.2 457.5 Q 257.5 457.5 257.5 472.8 L 257.5 527.2 Q 257.5 542.5 242.2 542.5 L 187.8 542.5 Q 172.5 542.5 172.5 527.2 L 172.5 472.8 Q 172.5 457.5 187.8 457.5 Z" style="fill:none; stroke:#c9171e; stroke-width:6.0px;" />
+        <path d="M 189.5 464.3 L 240.5 464.3 Q 250.7 464.3 250.7 474.5 L 250.7 525.5 Q 250.7 535.7 240.5 535.7 L 189.5 535.7 Q 179.3 535.7 179.3 525.5 L 179.3 474.5 Q 179.3 464.3 189.5 464.3 Z" style="fill:none; stroke:#c9171e; stroke-width:2.5px; opacity:0.22;" />
+        <text x="215" y="500" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:34px; font-weight:bold; text-anchor:middle; dominant-baseline:central;">Ctrl</text>
+        
+        <!-- Keycap Fn -->
+        <path d="M 557.8 257.5 L 612.2 257.5 Q 627.5 257.5 627.5 272.8 L 627.5 327.2 Q 627.5 342.5 612.2 342.5 L 557.8 342.5 Q 542.5 342.5 542.5 327.2 L 542.5 272.8 Q 542.5 257.5 557.8 257.5 Z" style="fill:none; stroke:#c9171e; stroke-width:6.0px;" />
+        <path d="M 559.5 264.3 L 610.4999999999999 264.3 Q 620.6999999999999 264.3 620.6999999999999 274.5 L 620.6999999999999 325.5 Q 620.6999999999999 335.7 610.4999999999999 335.7 L 559.5 335.7 Q 549.3 335.7 549.3 325.5 L 549.3 274.5 Q 549.3 264.3 559.5 264.3 Z" style="fill:none; stroke:#c9171e; stroke-width:2.5px; opacity:0.22;" />
+        <text x="585" y="300" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:34px; font-weight:bold; text-anchor:middle; dominant-baseline:central;">Fn</text>
+        
+        <!-- Keycap Alt -->
+        <path d="M 557.8 457.5 L 612.2 457.5 Q 627.5 457.5 627.5 472.8 L 627.5 527.2 Q 627.5 542.5 612.2 542.5 L 557.8 542.5 Q 542.5 542.5 542.5 527.2 L 542.5 472.8 Q 542.5 457.5 557.8 457.5 Z" style="fill:none; stroke:#c9171e; stroke-width:6.0px;" />
+        <path d="M 559.5 464.3 L 610.4999999999999 464.3 Q 620.6999999999999 464.3 620.6999999999999 474.5 L 620.6999999999999 525.5 Q 620.6999999999999 535.7 610.4999999999999 535.7 L 559.5 535.7 Q 549.3 535.7 549.3 525.5 L 549.3 474.5 Q 549.3 464.3 559.5 464.3 Z" style="fill:none; stroke:#c9171e; stroke-width:2.5px; opacity:0.22;" />
+        <text x="585" y="500" style="fill:#c9171e; font-family:&apos;Noto Sans JP&apos;, sans-serif; font-size:34px; font-weight:bold; text-anchor:middle; dominant-baseline:central;">Alt</text>
+    </g>
+</svg>

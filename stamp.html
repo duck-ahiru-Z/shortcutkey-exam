@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高度なショートカットキー検定スタンプエディタ v3</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 多彩でかっこいいGoogle Fontsの読み込み -->
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@500;700;900&family=Reggae+One&family=Sawarabi+Mincho:wght@700&family=Yuji+Syuku&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        /* 透過プレビュー用のチェッカーボード */
+        .canvas-bg {
+            background-image: linear-gradient(45deg, #f3f4f6 25%, transparent 25%), 
+                              linear-gradient(-45deg, #f3f4f6 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #f3f4f6 75%), 
+                              linear-gradient(-45deg, transparent 75%, #f3f4f6 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+            background-color: #ffffff;
+        }
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- ヘッダー -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-red-500 to-orange-600 text-white font-black text-xl w-10 h-10 flex items-center justify-center rounded-xl shadow-lg shadow-red-900/20 tracking-tighter">
+                    印
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        スタンプジェネレーター <span class="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-md font-mono">v3.0 Ultra</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">フォント変更・サイズ微調整・透過SVG/PNGエクスポート対応</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl font-mono text-slate-300">
+                <span>⚡️ SVG Vector Output Engine</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col lg:flex-row gap-6">
+        
+        <!-- 左側：超詳細コントロールパネル（スクロール可能） -->
+        <div class="w-full lg:w-5/12 space-y-4 flex flex-col max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-0 lg:pr-2">
+            
+            <!-- セクション1: テキストと言語設定 -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <span class="w-1.5 h-3 bg-red-500 rounded-sm"></span> 1. テキスト・フォント構成
+                </h2>
+                
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">使用フォント (Google Fonts連携)</label>
+                    <select id="paramFontFamily" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:ring-1 focus:ring-red-500 focus:outline-none">
+                        <option value="'Noto Sans JP', sans-serif">Noto Sans JP (王道モダンゴシック)</option>
+                        <option value="'Dela Gothic One', sans-serif">Dela Gothic One (超極太・超重量感)</option>
+                        <option value="'Reggae One', sans-serif">Reggae One (エッジの効いたモダン)</option>
+                        <option value="'Sawarabi Mincho', serif">Sawarabi Mincho (厳格な伝統明朝)</option>
+                        <option value="'Yuji Syuku', serif">Yuji Syuku (味のあるクラシック楷書)</option>
+                        <option value="sans-serif">System Sans (標準サンセリフ)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">上部テキスト</label>
+                        <input type="text" id="paramTitle" value="ショートカットキー検定" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">サイズ (px)</label>
+                        <input type="number" id="paramTitleSize" value="48" min="20" max="80" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">下部テキスト</label>
+                        <input type="text" id="paramBottom" value="認 定" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">サイズ (px)</label>
+                        <input type="number" id="paramBottomSize" value="56" min="20" max="80" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 border-t border-slate-900 pt-3">
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">中央エンブレム内文字</label>
+                        <input type="text" id="paramCenterText" value="S5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">サイズ (px)</label>
+                        <input type="number" id="paramCenterTextSize" value="88" min="30" max="120" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- セクション2: キーキャップの詳細編集 -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <span class="w-1.5 h-3 bg-orange-500 rounded-sm"></span> 2. キーキャップパーツ調整
+                </h2>
+                
+                <div class="grid grid-cols-4 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-center text-slate-400 mb-1">左上 (TL)</label>
+                        <input type="text" id="paramKeyTL" value="Ctrl" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-center text-white font-mono focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-center text-slate-400 mb-1">右上 (TR)</label>
+                        <input type="text" id="paramKeyTR" value="C" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-center text-white font-mono focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-center text-slate-400 mb-1">左下 (BL)</label>
+                        <input type="text" id="paramKeyBL" value="⌘" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-center text-white font-mono focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-center text-slate-400 mb-1">右下 (BR)</label>
+                        <input type="text" id="paramKeyBR" value="⏎" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-center text-white font-mono focus:outline-none focus:border-red-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">キーキャップサイズ (px)</label>
+                        <input type="number" id="paramKeySize" value="85" min="50" max="130" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">キー文字サイズ (px)</label>
+                        <input type="number" id="paramKeyFontSize" value="34" min="15" max="60" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">横方向オフセット (px)</label>
+                        <input type="number" id="paramKeyOffsetX" value="185" min="100" max="250" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">縦方向オフセット (px)</label>
+                        <input type="number" id="paramKeyOffsetY" value="100" min="50" max="200" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- セクション3: フレーム・ディテール調整 -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <span class="w-1.5 h-3 bg-yellow-500 rounded-sm"></span> 3. フレーム＆インクエフェクト
+                </h2>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">外枠の太さ (px)</label>
+                        <input type="number" id="paramBorderOuter" value="14" min="2" max="30" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">内枠の太さ (px)</label>
+                        <input type="number" id="paramBorderInner" value="4" min="0" max="15" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">外枠の角丸 (半径px)</label>
+                        <input type="number" id="paramRadiusOuter" value="45" min="0" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">内枠の角丸 (半径px)</label>
+                        <input type="number" id="paramRadiusInner" value="30" min="0" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-900">
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">全体傾き角度 (度)</label>
+                        <input type="number" id="paramRotate" value="-1.5" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1">かすれ強度 (0-10)</label>
+                        <input type="number" id="paramRoughness" value="3.5" min="0" max="10" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white text-center font-mono focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">スタンプインク色</label>
+                    <div class="flex gap-2 items-center">
+                        <input type="color" id="paramColor" value="#c9171e" class="bg-transparent border-0 w-8 h-8 p-0 rounded cursor-pointer shrink-0">
+                        <input type="text" id="paramColorText" value="#c9171e" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-white focus:outline-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側：リアルタイムプレビュー ＆ エクスポート -->
+        <div class="w-full lg:w-7/12 flex flex-col gap-4">
+            
+            <!-- レンダリング画面 -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">リアルタイムスタンププレビュー</span>
+                    <span class="text-[10px] text-slate-500 font-mono">800 &times; 800 Canvas</span>
+                </div>
+                
+                <div class="p-6 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center canvas-bg shadow-inner w-full max-w-[400px] aspect-square relative">
+                    <!-- 高精細Canvas (物理800x800をCSSでレスポンシブ縮小) -->
+                    <canvas id="stampCanvas" width="800" height="800" class="w-full h-full object-contain"></canvas>
+                </div>
+
+                <!-- 出力アクション群 -->
+                <div class="w-full grid grid-cols-2 gap-3 mt-4">
+                    <button id="btnDownloadSVG" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12"></path></svg>
+                        透過SVGベクター保存
+                    </button>
+                    <button id="btnDownloadPNG" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        高解像度PNG保存
+                    </button>
+                </div>
+            </div>
+
+            <!-- アプリ組み込み用のソースコード出力 -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl flex-grow flex flex-col min-h-[220px]">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">動的同期 Canvas API 描画ロジック</span>
+                    <button id="btnCopy" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 transition-colors">
+                        コードをコピー
+                    </button>
+                </div>
+                <div class="relative flex-grow">
+                    <pre class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-[11px] font-mono text-slate-300 overflow-x-auto absolute inset-0 max-h-full leading-relaxed"><code id="codeBlock"></code></pre>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="border-t border-slate-800 bg-slate-950/40 py-3 text-center text-[10px] text-slate-500 font-mono">
+        &copy; Shortcuts Proficiency Test Stamp Suite Engine v3.0
+    </footer>
+
+    <!-- フロントエンド・ロジック -->
+    <script>
+        const canvas = document.getElementById('stampCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 全コントロールDOM要素のバインド
+        const params = {
+            fontFamily: document.getElementById('paramFontFamily'),
+            title: document.getElementById('paramTitle'),
+            titleSize: document.getElementById('paramTitleSize'),
+            bottom: document.getElementById('paramBottom'),
+            bottomSize: document.getElementById('paramBottomSize'),
+            centerText: document.getElementById('paramCenterText'),
+            centerTextSize: document.getElementById('paramCenterTextSize'),
+            keyTL: document.getElementById('paramKeyTL'),
+            keyTR: document.getElementById('paramKeyTR'),
+            keyBL: document.getElementById('paramKeyBL'),
+            keyBR: document.getElementById('paramKeyBR'),
+            keySize: document.getElementById('paramKeySize'),
+            keyFontSize: document.getElementById('paramKeyFontSize'),
+            keyOffsetX: document.getElementById('paramKeyOffsetX'),
+            keyOffsetY: document.getElementById('paramKeyOffsetY'),
+            borderOuter: document.getElementById('paramBorderOuter'),
+            borderInner: document.getElementById('paramBorderInner'),
+            radiusOuter: document.getElementById('paramRadiusOuter'),
+            radiusInner: document.getElementById('paramRadiusInner'),
+            rotate: document.getElementById('paramRotate'),
+            roughness: document.getElementById('paramRoughness'),
+            color: document.getElementById('paramColor'),
+            colorText: document.getElementById('paramColorText')
+        };
+
+        // カラーピッカーとの双方向同期
+        params.color.addEventListener('input', (e) => {
+            params.colorText.value = e.target.value.toUpperCase();
+            renderAll();
+        });
+        params.colorText.addEventListener('input', (e) => {
+            if(/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                params.color.value = e.target.value;
+                renderAll();
+            }
+        });
+
+        // 全てのパラメータ変更時に自動再レンダリングをバインド
+        Object.values(params).forEach(element => {
+            if (element !== params.color && element !== params.colorText) {
+                element.addEventListener('input', renderAll);
+                if(element.tagName === 'SELECT') {
+                    element.addEventListener('change', renderAll);
+                }
+            }
+        });
+
+        // 角丸長方形パス生成ヘルパー (Canvas用)
+        function pathRoundedRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        // シールド（盾）描画ロジック (Canvas用)
+        function drawShieldBase(ctx, cx, cy, size, color, text, textSize, fontFamily) {
+            ctx.save();
+            ctx.lineWidth = size * 0.08;
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+
+            ctx.beginPath();
+            ctx.moveTo(cx - size / 2, cy - size * 0.4);
+            ctx.quadraticCurveTo(cx, cy - size * 0.5, cx + size / 2, cy - size * 0.4);
+            ctx.lineTo(cx + size / 2, cy + size * 0.1);
+            ctx.quadraticCurveTo(cx + size / 2, cy + size * 0.5, cx, cy + size * 0.7);
+            ctx.quadraticCurveTo(cx - size / 2, cy + size * 0.5, cx - size / 2, cy + size * 0.1);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 内側文字
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `900 ${textSize}px ${fontFamily}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, cx, cy + size * 0.04);
+            ctx.restore();
+        }
+
+        // キーキャップ描画ロジック (Canvas用)
+        function drawKeycapBase(ctx, cx, cy, size, label, fontSize, color, fontFamily) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = size * 0.07;
+            
+            // 外側枠
+            pathRoundedRect(ctx, cx - size/2, cy - size/2, size, size, size * 0.18);
+            ctx.stroke();
+            
+            // 内側立体ライン (透過インク調)
+            ctx.strokeStyle = color + "44";
+            ctx.lineWidth = size * 0.03;
+            pathRoundedRect(ctx, cx - size/2 + size*0.08, cy - size/2 + size*0.08, size*0.84, size*0.84, size * 0.12);
+            ctx.stroke();
+
+            // ラベルテキスト
+            ctx.fillStyle = color;
+            ctx.font = `bold ${fontSize}px ${fontFamily}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, cx, cy);
+            ctx.restore();
+        }
+
+        // かすれエフェクト適用 (Canvas用デス・アウトノイズ)
+        function applyNoiseEffect(ctx, w, h, roughness) {
+            if (roughness <= 0) return;
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            const totalPixels = w * h;
+            const density = totalPixels * (roughness / 2200);
+            
+            for (let i = 0; i < density; i++) {
+                const x = Math.random() * w;
+                const y = Math.random() * h;
+                const r = Math.random() * 1.6 + 0.3;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        // メインCanvasレンダリング
+        function renderCanvas() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+
+            // 回転・傾き
+            const angle = parseFloat(params.rotate.value) || 0;
+            ctx.translate(w / 2, h / 2);
+            ctx.rotate(angle * Math.PI / 180);
+            ctx.translate(-w / 2, -h / 2);
+
+            const color = params.color.value;
+            const font = params.fontFamily.value;
+
+            // 外枠
+            ctx.strokeStyle = color;
+            ctx.lineWidth = parseInt(params.borderOuter.value);
+            pathRoundedRect(ctx, 40, 40, w - 80, h - 80, parseInt(params.radiusOuter.value));
+            ctx.stroke();
+
+            // 内枠
+            const bInner = parseInt(params.borderInner.value);
+            if (bInner > 0) {
+                ctx.lineWidth = bInner;
+                const offset = 40 + parseInt(params.borderOuter.value)/2 + 8;
+                pathRoundedRect(ctx, offset, offset, w - offset*2, h - offset*2, parseInt(params.radiusInner.value));
+                ctx.stroke();
+            }
+
+            // テキスト配置
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+
+            // 上部テキスト
+            ctx.font = `900 ${params.titleSize.value}px ${font}`;
+            ctx.textBaseline = 'top';
+            ctx.fillText(params.title.value, w / 2, 95);
+
+            // 下部テキスト
+            ctx.font = `900 ${params.bottomSize.value}px ${font}`;
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(params.bottom.value, w / 2, h - 90);
+
+            // 中央シールド
+            drawShieldBase(ctx, w / 2, h / 2, 160, color, params.centerText.value, parseInt(params.centerTextSize.value), font);
+
+            // 4つのキーキャップ
+            const kSize = parseInt(params.keySize.value);
+            const kFontS = parseInt(params.keyFontSize.value);
+            const ox = parseInt(params.keyOffsetX.value);
+            const oy = parseInt(params.keyOffsetY.value);
+
+            drawKeycapBase(ctx, w/2 - ox, h/2 - oy, kSize, params.keyTL.value, kFontS, color, font);
+            drawKeycapBase(ctx, w/2 - ox, h/2 + oy, kSize, params.keyBL.value, kFontS, color, font);
+            drawKeycapBase(ctx, w/2 + ox, h/2 - oy, kSize, params.keyTR.value, kFontS, color, font);
+            drawKeycapBase(ctx, w/2 + ox, h/2 + oy, kSize, params.keyBR.value, kFontS, color, font);
+
+            // ノイズ
+            applyNoiseEffect(ctx, w, h, parseFloat(params.roughness.value));
+            ctx.restore();
+        }
+
+        // 高度なSVGデータ生成エンジン (完全ベクターデータ構造)
+        function buildSVGSource() {
+            const font = params.fontFamily.value.replace(/'/g, '&apos;');
+            const color = params.color.value;
+            const angle = params.rotate.value;
+            const roughness = parseFloat(params.roughness.value);
+
+            // SVG内でのリアルなインク滲み・かすれフィルタ定義
+            let filterString = '';
+            if (roughness > 0) {
+                const baseFreq = (0.02 + (roughness * 0.015)).toFixed(3);
+                const scaleVal = (2 + (roughness * 1.5)).toFixed(1);
+                filterString = `
+        <filter id="stamp-roughness">
+            <feTurbulence type="fractalNoise" baseFrequency="${baseFreq}" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="${scaleVal}" xChannelSelector="R" yChannelSelector="G" />
+        </filter>`;
+            }
+
+            // 4角丸長方形SVGパス定義用
+            const getRectPath = (x, y, w, h, r) => {
+                return `M ${x+r} ${y} L ${x+w-r} ${y} Q ${x+w} ${y} ${x+w} ${y+r} L ${x+w} ${y+h-r} Q ${x+w} ${y+h} ${x+w-r} ${y+h} L ${x+r} ${y+h} Q ${x} ${y+h} ${x} ${y+h-r} L ${x} ${y+r} Q ${x} ${y} ${x+r} ${y} Z`;
+            };
+
+            const ox = parseInt(params.keyOffsetX.value);
+            const oy = parseInt(params.keyOffsetY.value);
+            const kSize = parseInt(params.keySize.value);
+
+            // キーキャップ単体アセンブリ
+            const makeKeycapSVG = (cx, cy, label) => {
+                const rStyle = `fill:none; stroke:${color}; stroke-width:${(kSize*0.07).toFixed(1)};`;
+                const rInnerStyle = `fill:none; stroke:${color}; stroke-width:${(kSize*0.03).toFixed(1)}; opacity:0.25;`;
+                const tStyle = `fill:${color}; font-family:${font}; font-size:${params.keyFontSize.value}px; font-weight:bold; text-anchor:middle; dominant-baseline:central;`;
+                return `
+            <!-- Keycap ${label} -->
+            <path d="${getRectPath(cx - kSize/2, cy - kSize/2, kSize, kSize, kSize*0.18)}" style="${rStyle}" />
+            <path d="${getRectPath(cx - kSize/2 + kSize*0.08, cy - kSize/2 + kSize*0.08, kSize*0.84, kSize*0.84, kSize*0.12)}" style="${rInnerStyle}" />
+            <text x="${cx}" y="${cy}" style="${tStyle}">${label}</text>`;
+            };
+
+            const offsetInner = 40 + parseInt(params.borderOuter.value)/2 + 8;
+
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+    <defs>${filterString}
+    </defs>
+    <g transform="rotate(${angle}, 400, 400)" ${roughness > 0 ? 'filter="url(#stamp-roughness)"' : ''}>
+        <!-- 外枠 -->
+        <path d="${getRectPath(40, 40, 720, 720, parseInt(params.radiusOuter.value))}" style="fill:none; stroke:${color}; stroke-width:${params.borderOuter.value}px;" />
+        
+        <!-- 内枠 -->
+        ${params.borderInner.value > 0 ? `<path d="${getRectPath(offsetInner, offsetInner, 800 - offsetInner*2, 800 - offsetInner*2, parseInt(params.radiusInner.value))}" style="fill:none; stroke:${color}; stroke-width:${params.borderInner.value}px;" />` : ''}
+        
+        <!-- テキストパーツ -->
+        <text x="400" y="95" style="fill:${color}; font-family:${font}; font-size:${params.titleSize.value}px; font-weight:900; text-anchor:middle; dominant-baseline:hanging;">${params.title.value}</text>
+        <text x="400" y="710" style="fill:${color}; font-family:${font}; font-size:${params.bottomSize.value}px; font-weight:900; text-anchor:middle; dominant-baseline:baseline;">${params.bottom.value}</text>
+        
+        <!-- 中央シールドコア -->
+        <g>
+            <path d="M 320 336 Q 400 320 480 336 L 480 416 Q 480 480 400 512 Q 320 480 320 416 Z" style="fill:${color}; stroke:${color}; stroke-width:12.8px;" />
+            <text x="400" y="420" style="fill:#ffffff; font-family:${font}; font-size:${params.centerTextSize.value}px; font-weight:900; text-anchor:middle; dominant-baseline:central;">${params.centerText.value}</text>
+        </g>
+        
+        <!-- キーキャップ群 -->
+        ${makeKeycapSVG(400 - ox, 400 - oy, params.keyTL.value)}
+        ${makeKeycapSVG(400 - ox, 400 + oy, params.keyBL.value)}
+        ${makeKeycapSVG(400 + ox, 400 - oy, params.keyTR.value)}
+        ${makeKeycapSVG(400 + ox, 400 + oy, params.keyBR.value)}
+    </g>
+</svg>`;
+            return svg;
+        }
+
+        // CBTシステム組み込み用JavaScriptスニペット表示の同期更新
+        function updateCodeOutput() {
+            const code = `// ==========================================
+// ショートカットキー検定 CBTシステム用スタンプ描画関数 (動的生成 v3)
+// ==========================================
+function drawStampCBT(canvasId, options = {}) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width; // 800pxベース設計
+    const h = canvas.height;
+
+    const opt = Object.assign({
+        color: "${params.color.value}",
+        fontFamily: "${params.fontFamily.value}",
+        title: "${params.title.value}",
+        titleSize: ${params.titleSize.value},
+        bottom: "${params.bottom.value}",
+        bottomSize: ${params.bottomSize.value},
+        centerText: "${params.centerText.value}",
+        centerTextSize: ${params.centerTextSize.value},
+        keys: ["${params.keyTL.value}", "${params.keyTR.value}", "${params.keyBL.value}", "${params.keyBR.value}"],
+        keySize: ${params.keySize.value},
+        keyFontSize: ${params.keyFontSize.value},
+        ox: ${params.keyOffsetX.value},
+        oy: ${params.keyOffsetY.value},
+        borderOuter: ${params.borderOuter.value},
+        borderInner: ${params.borderInner.value},
+        rOuter: ${params.radiusOuter.value},
+        rInner: ${params.radiusInner.value},
+        rotate: ${params.rotate.value},
+        roughness: ${params.roughness.value}
+    }, options);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+
+    // 手押しブレ演出
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(opt.rotate * Math.PI / 180);
+    ctx.translate(-w / 2, -h / 2);
+
+    ctx.strokeStyle = opt.color;
+    ctx.fillStyle = opt.color;
+
+    // ヘルパー：角丸
+    const pathR = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+        ctx.quadraticCurveTo(x+w, y, x+w, y+r); ctx.lineTo(x+w, h/2+h/2-r);
+        ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h); ctx.lineTo(x+r, y+h);
+        ctx.quadraticCurveTo(x, y+h, x, y+h-r); ctx.lineTo(x, y+r);
+        ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
+    };
+
+    // 外枠と内枠
+    ctx.lineWidth = opt.borderOuter;
+    pathR(40, 40, w - 80, h - 80, opt.rOuter); ctx.stroke();
+    
+    if(opt.borderInner > 0) {
+        ctx.lineWidth = opt.borderInner;
+        const offset = 40 + opt.borderOuter/2 + 8;
+        pathR(offset, offset, w - offset*2, h - offset*2, opt.rInner); ctx.stroke();
+    }
+
+    // 文字スタンプ
+    ctx.textAlign = 'center';
+    ctx.font = '900 ' + opt.titleSize + 'px ' + opt.fontFamily;
+    ctx.textBaseline = 'top';
+    ctx.fillText(opt.title, w / 2, 95);
+
+    ctx.font = '900 ' + opt.bottomSize + 'px ' + opt.fontFamily;
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(opt.bottom, w / 2, h - 90);
+
+    // 中央コア盾
+    ctx.lineWidth = 12.8;
+    ctx.beginPath();
+    ctx.moveTo(w/2 - 80, h/2 - 64);
+    ctx.quadraticCurveTo(w/2, h/2 - 80, w/2 + 80, h/2 - 64);
+    ctx.lineTo(w/2 + 80, h/2 + 16);
+    ctx.quadraticCurveTo(w/2 + 80, h/2 + 80, w/2, h/2 + 112);
+    ctx.quadraticCurveTo(w/2 - 80, h/2 + 80, w/2 - 80, h/2 + 16);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 ' + opt.centerTextSize + 'px ' + opt.fontFamily;
+    ctx.textBaseline = 'middle'; ctx.fillText(opt.centerText, w / 2, h / 2 + 6);
+
+    // キーキャップアセンブリマウント
+    const drawK = (cx, cy, txt) => {
+        ctx.save(); ctx.strokeStyle = opt.color; ctx.lineWidth = opt.keySize * 0.07;
+        pathR(cx - opt.keySize/2, cy - opt.keySize/2, opt.keySize, opt.keySize, opt.keySize * 0.18); ctx.stroke();
+        ctx.fillStyle = opt.color; ctx.font = 'bold ' + opt.keyFontSize + 'px ' + opt.fontFamily;
+        ctx.textBaseline = 'middle'; ctx.fillText(txt, cx, cy); ctx.restore();
+    };
+    drawK(w/2 - opt.ox, h/2 - opt.oy, opt.keys[0]);
+    drawK(w/2 + opt.ox, h/2 - opt.oy, opt.keys[1]);
+    drawK(w/2 - opt.ox, h/2 + opt.oy, opt.keys[2]);
+    drawK(w/2 + opt.ox, h/2 + opt.oy, opt.keys[3]);
+
+    // かすれエフェクト
+    if(opt.roughness > 0) {
+        ctx.globalCompositeOperation = 'destination-out';
+        const density = (w * h) * (opt.roughness / 2200);
+        for (let i = 0; i < density; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random()*w, Math.random()*h, Math.random()*1.6 + 0.3, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+    ctx.restore();
+}`;
+            document.getElementById('codeBlock').textContent = code;
+        }
+
+        // 全統合レンダリング司令
+        function renderAll() {
+            renderCanvas();
+            updateCodeOutput();
+        }
+
+        // SVG保存ボタンアクション
+        document.getElementById('btnDownloadSVG').addEventListener('click', () => {
+            const svgString = buildSVGSource();
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const link = document.createElement('a');
+            link.download = `cbt-shortcut-stamp-${params.centerText.value}.svg`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        // PNG保存ボタンアクション
+        document.getElementById('btnDownloadPNG').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `cbt-shortcut-stamp-${params.centerText.value}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // ソースコピー
+        document.getElementById('btnCopy').addEventListener('click', (e) => {
+            navigator.clipboard.writeText(document.getElementById('codeBlock').textContent);
+            const orig = e.target.textContent;
+            e.target.textContent = "コピー完了 ✨";
+            e.target.classList.add("text-emerald-400");
+            setTimeout(() => {
+                e.target.textContent = orig;
+                e.target.classList.remove("text-emerald-400");
+            }, 1800);
+        });
+
+        // 初回起動
+        window.addEventListener('DOMContentLoaded', () => {
+            // Google Fontsが完全にパースされ適用されるよう少しバッファ
+            setTimeout(renderAll, 300);
+        });
+    </script>
+</body>
+</html>

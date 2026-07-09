@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ショートカットキー検定 統計ダッシュボード</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- jsPDF のインポート -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- 合格証書共通ライブラリのロード -->
+  <script src="js/certificate.js"></script>
+  <!-- Firebase SDK (Compat v9) & 設定ファイルのロード -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase_config.js"></script>
+
+  <style>
+    /* ==========================================
+       1. 基本スタイル & CSS変数 (フラット&直角ビジネス調)
+       ========================================== */
+    :root {
+      --bg-primary: #f1f5f9;
+      --bg-secondary: #ffffff;
+      --accent-navy: #1e3a8a;
+      --accent-navy-hover: #172554;
+      --accent-gold: #b45309;
+      --border-color: #4b5563;
+      --border-light: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --success: #059669;
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans JP', sans-serif;
+      border-radius: 0px !important; /* 角丸を一切使わない */
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent-navy);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ==========================================
+       2. ヘッダー & ナビゲーション
+       ========================================== */
+    header {
+      background-color: var(--accent-navy);
+      color: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 4px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-logo-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo-group h1 {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: #ffffff;
+      border: 1px solid #ffffff;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background-color: #ffffff;
+      color: var(--accent-navy);
+    }
+
+    /* ==========================================
+       3. メインレイアウト
+       ========================================== */
+    .container {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 24px;
+    }
+
+    /* モニターアラート */
+    .mode-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #e2e8f0;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .mode-firebase {
+      background-color: #fef3c7;
+      color: var(--accent-gold);
+      border-color: var(--accent-gold);
+    }
+
+    /* グリッドレイアウト */
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-card-title {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .stat-card-val {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--accent-navy);
+    }
+
+    /* セクションブロック */
+    .section-block {
+      background-color: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 割合バーグラフ */
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 100px 1fr 60px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-label {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .bar-track {
+      background-color: #f1f5f9;
+      border: 1px solid var(--border-light);
+      height: 24px;
+      width: 100%;
+      position: relative;
+    }
+
+    .bar-fill {
+      background-color: var(--accent-navy);
+      height: 100%;
+      width: 0%;
+      transition: width 0.8s ease-out;
+    }
+
+    .bar-value {
+      font-size: 14px;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    /* テーブルデザイン */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    th {
+      background-color: #f8fafc;
+      font-weight: bold;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    /* バッジ */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      border: 1px solid var(--border-color);
+    }
+
+    .badge-pass {
+      background-color: #ecfdf5;
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .badge-fail {
+      background-color: #fef2f2;
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .badge-repeater {
+      background-color: #eff6ff;
+      color: var(--accent-navy);
+      border-color: var(--accent-navy);
+      margin-left: 6px;
+    }
+
+    .badge-rank {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background-color: #e2e8f0;
+      border: 1px solid var(--border-color);
+    }
+
+    .badge-rank-1 {
+      background-color: #fef3c7;
+      color: var(--accent-gold);
+      border-color: var(--accent-gold);
+    }
+
+    /* アクションボタン */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      background-color: var(--accent-navy);
+      color: #ffffff;
+      border: 2px solid var(--border-color);
+      padding: 8px 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-navy-hover);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: #f1f5f9;
+    }
+
+    /* 正答率テーブル内のミニバー */
+    .mini-bar-track {
+      background-color: #f1f5f9;
+      border: 1px solid var(--border-light);
+      height: 10px;
+      width: 100px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .mini-bar-fill {
+      background-color: var(--success);
+      height: 100%;
+    }
+
+    .mini-bar-fill-low {
+      background-color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="header-logo-group">
+      <h1>ショートカットキー検定 管理統計</h1>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="window.location.href='index.html'">◀ 試験サイトへ戻る</button>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- 稼働モード表示 -->
+    <div id="mode-monitor" class="mode-badge">
+      読み込み中...
+    </div>
+
+    <!-- 全体統計カード -->
+    <div class="grid-stats">
+      <div class="stat-card">
+        <div class="stat-card-title">総受験件数</div>
+        <div id="stat-total" class="stat-card-val">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-title">合格者数</div>
+        <div id="stat-passed" class="stat-card-val">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-title">平均合格率</div>
+        <div id="stat-rate" class="stat-card-val">0%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-title">ユニーク受験者数</div>
+        <div id="stat-unique" class="stat-card-val">0</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="grid-layout-2col">
+      <!-- 級別受験者割合 -->
+      <div class="section-block">
+        <div class="section-title">級別受験状況</div>
+        <div id="grade-chart" class="chart-container">
+          <!-- 動的レンダリング -->
+        </div>
+      </div>
+
+      <!-- デバッグ＆操作ブロック -->
+      <div class="section-block" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <div class="section-title">データベース操作</div>
+          <p style="font-size:14px; color:var(--text-muted); margin-bottom:16px;">
+            Firebaseがまだ連携されていない場合は、ブラウザの LocalStorage を用いて統計結果をローカルシミュレーションします。<br>
+            「ダミーデータを生成」ボタンを押すと、同一人物のリピート受験や様々な問題別の正答/誤答データを含んだ15件のテストデータを即座に生成し、グラフやランキングの動作を確認できます。
+          </p>
+        </div>
+        <div class="btn-group">
+          <button id="btn-refresh" class="btn">データを更新</button>
+          <button id="btn-dummy" class="btn btn-secondary">[開発用] ダミーデータを生成 (15件)</button>
+          <button id="btn-clear" class="btn btn-secondary" style="border-color:var(--danger); color:var(--danger);">ローカルデータを消去</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 問題別正答率ランキング (ワースト/ベスト) -->
+    <div class="section-block">
+      <div class="section-title">問題別正答率ランキング (難易度順)</div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">受験者がどの問題（ショートカットキー）を間違えやすいかの分析結果です（正答率が低い順に表示）。</p>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 60px;">順位</th>
+              <th>出題問題文 (対象キー)</th>
+              <th style="width: 140px;">正答率</th>
+              <th style="width: 100px;">正解数/出題数</th>
+              <th style="width: 120px;">正解キー</th>
+            </tr>
+          </thead>
+          <tbody id="question-ranking-body">
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted);">データがありません。受験ログが送信されると集計が始まります。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 最近の受験ログ -->
+    <div class="section-block">
+      <div class="section-title">受験者ログ履歴</div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>受験日時</th>
+              <th>受験端末ID (Visitor ID)</th>
+              <th>受験級</th>
+              <th>スコア (正答率)</th>
+              <th>合否</th>
+              <th>所要時間</th>
+              <th style="width: 130px;">合格証書</th>
+            </tr>
+          </thead>
+          <tbody id="log-table-body">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted);">データがありません。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 合格証書プレビューモーダル -->
+  <div id="cert-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; padding:20px;">
+    <div style="background:#ffffff; border:2px solid var(--border-color); max-width:600px; width:100%; padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <h2 style="font-size:18px; font-weight:900; border-bottom:2px solid var(--border-color); padding-bottom:8px;">合格証書の再発行・プレビュー</h2>
+      <p style="font-size:13px; color:var(--text-muted);">※個人情報保護のため、氏名はDBに保存されていません。証書に印字する受験者名を入力してください。</p>
+      
+      <div style="display:flex; gap:12px;">
+        <input type="text" id="cert-last-name" placeholder="姓 (例: 山田)" style="flex:1; padding:8px; border:1px solid var(--border-light); font-size:14px;">
+        <input type="text" id="cert-first-name" placeholder="名 (例: 太郎)" style="flex:1; padding:8px; border:1px solid var(--border-light); font-size:14px;">
+      </div>
+      
+      <button id="btn-draw-cert" class="btn" style="width:100%;">合格証書を生成 📄</button>
+      
+      <div id="cert-preview-area" style="display:none; border: 2px solid #c5a880; background-color: #fdfbf7; margin-top:8px;">
+        <canvas id="certCanvasPreview" style="width:100%; height:auto; display:block;"></canvas>
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button id="btn-download-png" class="btn" style="display:none;">画像で保存</button>
+        <button id="btn-download-pdf" class="btn btn-secondary" style="display:none;">PDFで保存</button>
+        <button id="btn-close-modal" class="btn btn-secondary" style="border-color:var(--text-muted);">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === 管理者認証 (簡易パスコード保護) ===
+    const ADMIN_PASS = "shortcut-admin";
+    if (sessionStorage.getItem('dashboard_auth') !== 'true') {
+      const inputPass = prompt("管理者用パスコードを入力してください:");
+      if (inputPass === ADMIN_PASS) {
+        sessionStorage.setItem('dashboard_auth', 'true');
+      } else {
+        alert("パスコードが正しくありません。アクセスを拒否します。");
+        document.body.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#f1f5f9; color:#0f172a; font-family:sans-serif; text-align:center; padding:20px;">
+            <h1 style="font-size:24px; margin-bottom:12px; font-weight:900;">アクセス拒否</h1>
+            <p style="color:#475569; font-size:14px;">正しいパスコードを入力してページをリロードしてください。</p>
+          </div>
+        `;
+        throw new Error("Unauthorized access");
+      }
+    }
+
+    // グローバル状態
+    let visitorCountMap = {}; // visitorId -> 受験回数
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initModeDisplay();
+      loadDashboardData();
+
+      document.getElementById('btn-refresh').addEventListener('click', loadDashboardData);
+      document.getElementById('btn-dummy').addEventListener('click', generateDummyData);
+      document.getElementById('btn-clear').addEventListener('click', clearLocalData);
+    });
+
+    /**
+     * 動作モード(Firebase / LocalStorageモック)の表示
+     */
+    function initModeDisplay() {
+      const monitor = document.getElementById('mode-monitor');
+      if (isFirebaseConfigured) {
+        monitor.textContent = "● Firebase 接続中 (クラウド上の本物のデータベースとリアルタイムに同期しています)";
+        monitor.className = "mode-badge mode-firebase";
+      } else {
+        monitor.textContent = "▲ デモ/ローカルモックモード稼働中 (Firebaseが未設定のため、ブラウザのLocalStorageで統計を疑似実行しています。firebase_setup.mdを参照してください)";
+        monitor.className = "mode-badge";
+      }
+    }
+
+    /**
+     * データベース(Firestore または Mock)からデータをロードして表示
+     */
+    function loadDashboardData() {
+      if (isFirebaseConfigured && db) {
+        // Firebase Firestoreから読み込み
+        db.collection("exam_records").orderBy("timestamp", "desc").get()
+          .then(querySnapshot => {
+            const records = [];
+            querySnapshot.forEach(doc => {
+              const data = doc.data();
+              // Firestore の Timestamp オブジェクトをパース
+              if (data.timestamp && data.timestamp.toDate) {
+                const date = data.timestamp.toDate();
+                data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+              } else {
+                data.timestampString = new Date(data.timestamp || Date.now()).toLocaleString('ja-JP');
+              }
+              records.push(data);
+            });
+            processAndRender(records);
+          })
+          .catch(err => {
+            console.error("Firestoreデータ取得に失敗したためモックを表示します:", err);
+            processAndRender(getMockRecords());
+          });
+      } else {
+        // ローカルモック
+        const records = getMockRecords();
+        // 日付ソート (降順)
+        records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        records.forEach(r => {
+          const date = new Date(r.timestamp);
+          r.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        });
+        processAndRender(records);
+      }
+    }
+
+    /**
+     * 受験履歴データから統計情報を加工してレンダリング
+     */
+    function processAndRender(records) {
+      if (!records || records.length === 0) {
+        resetUI();
+        return;
+      }
+
+      // 1. 各種カウンターの集計
+      const totalCount = records.length;
+      const passedCount = records.filter(r => r.passed).length;
+      const passedRate = Math.round((passedCount / totalCount) * 100);
+
+      // 同一人物(visitorId)の集計
+      visitorCountMap = {};
+      const uniqueVisitors = new Set();
+      // 古い順に見ていき、何回目の受験かをカウントする
+      const chronological = [...records].reverse();
+      chronological.forEach(r => {
+        if (r.visitorId) {
+          uniqueVisitors.add(r.visitorId);
+          visitorCountMap[r.visitorId] = (visitorCountMap[r.visitorId] || 0) + 1;
+          r.nthExam = visitorCountMap[r.visitorId]; // この受験レコードが何回目か
+        }
+      });
+
+      // 表示を更新
+      document.getElementById('stat-total').textContent = totalCount;
+      document.getElementById('stat-passed').textContent = passedCount;
+      document.getElementById('stat-rate').textContent = `${passedRate}%`;
+      document.getElementById('stat-unique').textContent = uniqueVisitors.size;
+
+      // 2. 級別の受験者数集計
+      const gradeCounts = { '5kyu': 0, '4kyu': 0, '3kyu': 0, '2kyu': 0, '1kyu': 0 };
+      const gradeTitles = { '5kyu': '5級', '4kyu': '4級', '3kyu': '3級', '2kyu': '2級', '1kyu': '1級' };
+      records.forEach(r => {
+        if (gradeCounts[r.grade] !== undefined) {
+          gradeCounts[r.grade]++;
+        }
+      });
+
+      const gradeChart = document.getElementById('grade-chart');
+      gradeChart.innerHTML = '';
+      Object.keys(gradeCounts).forEach(grade => {
+        const count = gradeCounts[grade];
+        const pct = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
+        
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+          <div class="bar-label">${gradeTitles[grade]}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${pct}%;"></div>
+          </div>
+          <div class="bar-value">${count}人 (${pct}%)</div>
+        `;
+        gradeChart.appendChild(row);
+      });
+
+      // 3. 問題別正答率の集計
+      const qStats = {}; // questionId -> { text, answer, correctCount, totalCount }
+      records.forEach(r => {
+        if (r.details && Array.isArray(r.details)) {
+          r.details.forEach(d => {
+            const qId = d.questionId;
+            if (!qStats[qId]) {
+              qStats[qId] = {
+                text: d.questionText,
+                answer: d.correctAnswer,
+                correctCount: 0,
+                totalCount: 0
+              };
+            }
+            qStats[qId].totalCount++;
+            if (d.isCorrect) {
+              qStats[qId].correctCount++;
+            }
+          });
+        }
+      });
+
+      const qList = Object.keys(qStats).map(qId => {
+        const s = qStats[qId];
+        return {
+          id: qId,
+          text: s.text,
+          answer: s.answer,
+          total: s.totalCount,
+          correct: s.correctCount,
+          rate: Math.round((s.correctCount / s.totalCount) * 100)
+        };
+      });
+
+      // 正答率の低い順（ワースト順）にソート
+      qList.sort((a, b) => a.rate - b.rate);
+
+      const rankingBody = document.getElementById('question-ranking-body');
+      rankingBody.innerHTML = '';
+      
+      // ワースト10問を表示
+      const worstCount = Math.min(qList.length, 10);
+      for (let i = 0; i < worstCount; i++) {
+        const q = qList[i];
+        const tr = document.createElement('tr');
+        
+        const isLow = q.rate < 60;
+        const barClass = isLow ? 'mini-bar-fill mini-bar-fill-low' : 'mini-bar-fill';
+        const rankClass = i === 0 ? 'badge-rank badge-rank-1' : 'badge-rank';
+
+        tr.innerHTML = `
+          <td><span class="${rankClass}">${i + 1}</span></td>
+          <td style="font-weight:500;">${escapeHtml(q.text)}</td>
+          <td>
+            <div class="mini-bar-track">
+              <div class="${barClass}" style="width: ${q.rate}%;"></div>
+            </div>
+            <span style="font-weight:bold; color: ${isLow ? 'var(--danger)' : 'var(--success)'};">${q.rate}%</span>
+          </td>
+          <td>${q.correct} / ${q.total}</td>
+          <td><span class="badge" style="background:#f1f5f9;">${escapeHtml(q.answer)}</span></td>
+        `;
+        rankingBody.appendChild(tr);
+      }
+
+      if (qList.length === 0) {
+        rankingBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">出題ログ情報がデータベースに含まれていません。</td></tr>`;
+      }
+
+      // 4. 受験履歴テーブルの描画
+      const logBody = document.getElementById('log-table-body');
+      logBody.innerHTML = '';
+
+      records.forEach(r => {
+        const tr = document.createElement('tr');
+        
+        // 同一人物リピート検知用のバッジ
+        let repeaterBadge = '';
+        // そのvisitorId全体の受験回数が2回以上の場合、このレコードの回数をバッジ表示
+        if (r.visitorId && visitorCountMap[r.visitorId] > 1) {
+          repeaterBadge = `<span class="badge badge-repeater" title="同一人物による受験">${r.nthExam}回目の受験</span>`;
+        }
+
+        const min = Math.floor(r.timeTaken / 60);
+        const sec = r.timeTaken % 60;
+        const timeStr = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+
+        const displayId = r.visitorId ? (r.visitorId.startsWith('device_') ? r.visitorId.substring(0, 16) + '...' : r.visitorId) : '不明な端末';
+
+        let certBtn = '-';
+        if (r.passed) {
+          const certNo = r.certNo || `No. SC-${r.grade.replace('kyu', '')}-${new Date(r.timestamp).getFullYear()}-TEMP`;
+          const dateStr = r.timestampString.split(' ')[0].replace(/\//g, '年') + '日';
+          certBtn = `<button class="btn" style="font-size:11px; padding:4px 8px; width:auto; border: 1px solid var(--border-color); background:#eff6ff;" 
+            onclick="openCertPreview('${r.score}', '${r.rate}', '${certNo}', '${dateStr}', '${r.gradeTitle}', '${r.grade}')">証書表示 📄</button>`;
+        }
+
+        tr.innerHTML = `
+          <td>${r.timestampString}</td>
+          <td style="font-weight: 500; font-family: monospace;">${escapeHtml(displayId)}${repeaterBadge}</td>
+          <td>${escapeHtml(r.gradeTitle)}</td>
+          <td><strong>${r.score}問</strong> (${r.rate}%)</td>
+          <td><span class="badge ${r.passed ? 'badge-pass' : 'badge-fail'}">${r.passed ? '合格' : '不合格'}</span></td>
+          <td>${timeStr}</td>
+          <td>${certBtn}</td>
+        `;
+        logBody.appendChild(tr);
+      });
+    }
+
+    // === 合格証書プレビューモーダル制御 ===
+    let currentCertData = null;
+
+    function openCertPreview(score, rate, certNo, dateStr, gradeTitle, gradeId) {
+      currentCertData = { score: parseInt(score, 10), rate: parseInt(rate, 10), certNo, dateStr, gradeTitle, gradeId };
+      
+      document.getElementById('cert-last-name').value = '';
+      document.getElementById('cert-first-name').value = '';
+      
+      document.getElementById('cert-preview-area').style.display = 'none';
+      document.getElementById('btn-download-png').style.display = 'none';
+      document.getElementById('btn-download-pdf').style.display = 'none';
+      
+      document.getElementById('cert-modal').style.display = 'flex';
+    }
+
+    document.getElementById('btn-close-modal').addEventListener('click', () => {
+      document.getElementById('cert-modal').style.display = 'none';
+      currentCertData = null;
+    });
+
+    document.getElementById('btn-draw-cert').addEventListener('click', async () => {
+      if (!currentCertData) return;
+      
+      const lastName = document.getElementById('cert-last-name').value.trim();
+      const firstName = document.getElementById('cert-first-name').value.trim();
+      
+      if (!lastName || !firstName) {
+        alert("受験者の姓と名を入力してください。");
+        return;
+      }
+
+      const canvas = document.getElementById('certCanvasPreview');
+      await CertificateApp.generate(canvas, {
+        score: currentCertData.score,
+        rate: currentCertData.rate,
+        certNo: currentCertData.certNo,
+        dateStr: currentCertData.dateStr,
+        gradeTitle: currentCertData.gradeTitle,
+        lastName: lastName,
+        firstName: firstName
+      });
+
+      document.getElementById('cert-preview-area').style.display = 'block';
+      document.getElementById('btn-download-png').style.display = 'inline-block';
+      document.getElementById('btn-download-pdf').style.display = 'inline-block';
+    });
+
+    document.getElementById('btn-download-png').addEventListener('click', () => {
+      const canvas = document.getElementById('certCanvasPreview');
+      const link = document.createElement('a');
+      link.download = `certificate_${currentCertData ? currentCertData.gradeId : 'print'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    document.getElementById('btn-download-pdf').addEventListener('click', () => {
+      const canvas = document.getElementById('certCanvasPreview');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      const imgData = canvas.toDataURL('image/png');
+      doc.addImage(imgData, 'PNG', 0, 0, 297, 210);
+      doc.save(`certificate_${currentCertData ? currentCertData.gradeId : 'print'}.pdf`);
+    });
+
+
+  </script>
+</body>
+</html>

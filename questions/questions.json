@@ -1,0 +1,343 @@
+{
+  "5kyu": {
+    "id": "5kyu",
+    "title": "ショートカットキー検定 5級 (Windows版)",
+    "questionsCount": 30,
+    "passingRate": 0.8,
+    "duration": 1800,
+    "pool": [
+      {
+        "id": 1,
+        "question": "選択したテキストやファイルを「コピー」するショートカットキーはどれですか？",
+        "choices": ["Ctrl + C", "Ctrl + V", "Ctrl + X", "Ctrl + Z"],
+        "answer": "Ctrl + C"
+      },
+      {
+        "id": 2,
+        "question": "Wordやメモ帳で、文字を入力中に間違えて消してしまいました。直前の状態に「元に戻す」キーはどれですか？",
+        "choices": ["Ctrl + Y", "Ctrl + Z", "Ctrl + S", "Ctrl + A"],
+        "answer": "Ctrl + Z"
+      },
+      {
+        "id": 3,
+        "question": "コピーや切り取りをしたデータを、別の場所に「貼り付ける（ペースト）」キーはどれですか？",
+        "choices": ["Ctrl + P", "Ctrl + V", "Ctrl + B", "Ctrl + C"],
+        "answer": "Ctrl + V"
+      },
+      {
+        "id": 4,
+        "question": "作成中のドキュメントを「上書き保存」するショートカットキーはどれですか？",
+        "choices": ["Ctrl + O", "Ctrl + D", "Ctrl + S", "Ctrl + W"],
+        "answer": "Ctrl + S"
+      },
+      {
+        "id": 5,
+        "question": "文章の一部を別の場所に移動させたい場合、まずテキストを選択して「切り取り（カット）」を行います。どのキーを使いますか？",
+        "choices": ["Ctrl + X", "Ctrl + C", "Ctrl + V", "Ctrl + Z"],
+        "answer": "Ctrl + X"
+      },
+      {
+        "id": 6,
+        "question": "PCの操作中に「すべてを選択」したいです。正しいキーの組み合わせはどれですか？",
+        "choices": ["Ctrl + A", "Ctrl + S", "Ctrl + All", "Shift + A"],
+        "answer": "Ctrl + A"
+      },
+      {
+        "id": 7,
+        "question": "開いているウィンドウを閉じるためのショートカットキーはどれですか？",
+        "choices": ["Ctrl + W", "Ctrl + Q", "Ctrl + C", "Ctrl + F"],
+        "answer": "Ctrl + W"
+      },
+      {
+        "id": 8,
+        "question": "現在開いているWordやブラウザの画面内で、特定の文字を「検索」するボックスを表示させるキーはどれですか？",
+        "choices": ["Ctrl + F", "Ctrl + S", "Ctrl + H", "Ctrl + G"],
+        "answer": "Ctrl + F"
+      },
+      {
+        "id": 9,
+        "question": "新しく空のファイルやウィンドウを「新規作成」するショートカットキーはどれですか？",
+        "choices": ["Ctrl + N", "Ctrl + O", "Ctrl + M", "Ctrl + C"],
+        "answer": "Ctrl + N"
+      },
+      {
+        "id": 10,
+        "question": "「元に戻す（Ctrl + Z）」を押しすぎてしまったときに、「やり直す（元に戻す操作を取り消す）」キーはどれですか？",
+        "choices": ["Ctrl + Y", "Ctrl + U", "Ctrl + R", "Ctrl + T"],
+        "answer": "Ctrl + Y"
+      },
+      {
+        "id": 11,
+        "question": "マウスを使わずに、現在開いているウィンドウ（アプリ）を切り替えることができるショートカットキーはどれですか？",
+        "choices": ["Alt + Tab", "Ctrl + Tab", "Shift + Tab", "Windows + Tab"],
+        "answer": "Alt + Tab"
+      },
+      {
+        "id": 12,
+        "question": "選択したファイルやフォルダの「名前を変更」する際に便利なファンクションキーはどれですか？",
+        "choices": ["F2", "F4", "F5", "F12"],
+        "answer": "F2"
+      },
+      {
+        "id": 13,
+        "question": "Webページが最新の状態に更新されないとき、「ページの更新（リロード）」を行うキーはどれですか？",
+        "choices": ["F1", "F3", "F5", "F7"],
+        "answer": "F5"
+      },
+      {
+        "id": 14,
+        "question": "PCの操作中に「コピー」を実行したいです。正しいキーの組み合わせはどれですか？",
+        "choices": ["Alt + C", "Shift + C", "Windows + C", "Ctrl + C"],
+        "answer": "Ctrl + C"
+      },
+      {
+        "id": 15,
+        "question": "資料作成中、こまめにデータを保存して保存を防ぎたいです。どのキーを定期的に押すべきですか？",
+        "choices": ["Ctrl + S", "Ctrl + B", "Ctrl + P", "Ctrl + Z"],
+        "answer": "Ctrl + S"
+      },
+      {
+        "id": 16,
+        "question": "Webサイトのテキストを引用するため、選択してクリップボードに記憶させるショートカットキーはどれですか？",
+        "choices": ["Ctrl + X", "Ctrl + C", "Ctrl + V", "Ctrl + A"],
+        "answer": "Ctrl + C"
+      },
+      {
+        "id": 17,
+        "question": "コピーしたURLを、ブラウザのアドレスバーに入力する際に使うショートカットキーはどれですか？",
+        "choices": ["Ctrl + P", "Ctrl + I", "Ctrl + V", "Ctrl + U"],
+        "answer": "Ctrl + V"
+      },
+      {
+        "id": 18,
+        "question": "エクセルで誤って重要な行を削除してしまいました。すぐに対処するためのキーはどれですか？",
+        "choices": ["Ctrl + D", "Ctrl + Z", "Ctrl + Y", "Ctrl + R"],
+        "answer": "Ctrl + Z"
+      },
+      {
+        "id": 19,
+        "question": "不要になった文字やファイルを削除する際、右クリックメニューを使わずに実行できるショートカットキーはどれですか？",
+        "choices": ["Delete", "Backspace", "Insert", "End"],
+        "answer": "Delete"
+      },
+      {
+        "id": 20,
+        "question": "ブラウザで表示しているPDFファイルを紙に打ち出したいです。どのキーを押すと印刷設定が開きますか？",
+        "choices": ["Ctrl + O", "Ctrl + P", "Ctrl + L", "Ctrl + F"],
+        "answer": "Ctrl + P"
+      },
+      {
+        "id": 21,
+        "question": "画面上に表示されている文字を一括でコピーするため、まずはすべてを選択状態にしたいです。どのキーを使いますか？",
+        "choices": ["Ctrl + A", "Ctrl + All", "Shift + A", "Alt + A"],
+        "answer": "Ctrl + A"
+      },
+      {
+        "id": 22,
+        "question": "ファイル名を変えるため、右クリックして「名前の変更」を選ぶ代わりに使えるキーはどれですか？",
+        "choices": ["F2", "F5", "F10", "Enter"],
+        "answer": "F2"
+      },
+      {
+        "id": 23,
+        "question": "ブラウザでたくさんのタブを開いている際、新しい空のタブを追加するショートカットキーはどれですか？",
+        "choices": ["Ctrl + T", "Ctrl + N", "Ctrl + W", "Ctrl + E"],
+        "answer": "Ctrl + T"
+      },
+      {
+        "id": 24,
+        "question": "現在開いているブラウザのタブや、ウィンドウを閉じるためのショートカットキーはどれですか？",
+        "choices": ["Ctrl + W", "Ctrl + Q", "Ctrl + C", "Ctrl + X"],
+        "answer": "Ctrl + W"
+      },
+      {
+        "id": 25,
+        "question": "全画面表示になっている動画やスライドショーを終了（キャンセル）するときによく使うキーはどれですか？",
+        "choices": ["Esc", "Shift", "Ctrl", "Alt"],
+        "answer": "Esc"
+      },
+      {
+        "id": 26,
+        "question": "「切り取り」を行うショートカットキー（Ctrl + X）の「X」は、どのようなイメージで覚えるのが一般的ですか？（正解のキーを選択してください）",
+        "choices": ["ハサミの形だから（Ctrl + X）", "バツ印だから（Ctrl + X）", "Extraの略だから（Ctrl + X）", "特に意味はない（Ctrl + X）"],
+        "answer": "ハサミの形だから（Ctrl + X）"
+      },
+      {
+        "id": 27,
+        "question": "文章中の特定の単語がどこにあるか見つけたいとき、検索ボックスを呼び出すショートカットキーはどれですか？",
+        "choices": ["Ctrl + F", "Ctrl + S", "Ctrl + G", "Ctrl + W"],
+        "answer": "Ctrl + F"
+      },
+      {
+        "id": 28,
+        "question": "作業中のウィンドウを最小化し、デスクトップ画面をすぐに表示させるショートカットキーはどれですか？",
+        "choices": ["Windows + D", "Windows + M", "Alt + D", "Ctrl + D"],
+        "answer": "Windows + D"
+      },
+      {
+        "id": 29,
+        "question": "間違えて閉じてしまったブラウザのタブを、もう一度復元するショートカットキーはどれですか？",
+        "choices": ["Ctrl + Shift + T", "Ctrl + Z", "Ctrl + Y", "Ctrl + Shift + R"],
+        "answer": "Ctrl + Shift + T"
+      },
+      {
+        "id": 30,
+        "question": "エクスプローラーを開き、PC内のファイルを探し始めたいときに使うショートカットキーはどれですか？",
+        "choices": ["Windows + E", "Windows + F", "Ctrl + E", "Alt + E"],
+        "answer": "Windows + E"
+      },
+      {
+        "id": 31,
+        "question": "上司から「この資料、急いで印刷して！」と頼まれました。Wordファイルを開いた状態で、最も早く印刷画面を出すキーはどれですか？",
+        "choices": ["Ctrl + P", "Alt + P", "Shift + P", "Windows + P"],
+        "answer": "Ctrl + P"
+      },
+      {
+        "id": 32,
+        "question": "文字を入力中に「Ctrl + Z」を押しすぎて、必要な部分まで消えてしまいました。一つ先の状態に「やり直す」キーはどれですか？",
+        "choices": ["Ctrl + Y", "Ctrl + Shift + Z", "Ctrl + X", "Ctrl + R"],
+        "answer": "Ctrl + Y"
+      },
+      {
+        "id": 33,
+        "question": "USBメモリ内の複数ある写真をすべて別のフォルダにコピーしたいです。まず最初に「すべての写真を選択」するキーはどれですか？",
+        "choices": ["Ctrl + A", "Shift + A", "Alt + A", "Windows + A"],
+        "answer": "Ctrl + A"
+      },
+      {
+        "id": 34,
+        "question": "Webサイトを見ていて「申し込みはこちら」という文字をコピーしたいです。選択後、どのキーを押せばクリップボードに保存されますか？",
+        "choices": ["Ctrl + C", "Ctrl + S", "Ctrl + X", "Ctrl + V"],
+        "answer": "Ctrl + C"
+      },
+      {
+        "id": 35,
+        "question": "Excelのセルに入力されているデータを、別のセルに「移動」させたいです。「切り取り」を行うためのショートカットキーはどれですか？",
+        "choices": ["Ctrl + X", "Ctrl + C", "Ctrl + M", "Ctrl + D"],
+        "answer": "Ctrl + X"
+      },
+      {
+        "id": 36,
+        "question": "「Ctrl + V」はペースト（貼り付け）のショートカットキーですが、なぜ「P」ではなく「V」が割り当てられていると言われていますか？（※諸説あり）",
+        "choices": ["C（コピー）の隣のキーで押しやすいから", "Velcro（マジックテープ）の略だから", "View（表示する）の略だから", "特に理由はなくランダムに決まった"],
+        "answer": "C（コピー）の隣のキーで押しやすいから"
+      },
+      {
+        "id": 37,
+        "question": "企画書を作成中、突然PCがフリーズしてデータが消えるのを防ぎたいです。息をするように押すべき「上書き保存」のキーはどれですか？",
+        "choices": ["Ctrl + S", "Ctrl + H", "Ctrl + K", "Ctrl + Enter"],
+        "answer": "Ctrl + S"
+      },
+      {
+        "id": 38,
+        "question": "長いPDFマニュアルの中から「設定」という言葉が含まれるページを探したいです。検索ウィンドウを出すキーはどれですか？",
+        "choices": ["Ctrl + F", "Ctrl + S", "Ctrl + E", "Ctrl + W"],
+        "answer": "Ctrl + F"
+      },
+      {
+        "id": 39,
+        "question": "会議中に見せていたブラウザのタブを、すぐに閉じたいです。マウスの「×」ボタンを押さずに閉じるキーはどれですか？",
+        "choices": ["Ctrl + W", "Ctrl + C", "Ctrl + Q", "Ctrl + T"],
+        "answer": "Ctrl + W"
+      },
+      {
+        "id": 40,
+        "question": "調べ物をしていて、新しいWebページを「新しいタブ」で開きたいとき、キーボードから手を離さずに開くショートカットはどれですか？",
+        "choices": ["Ctrl + T", "Ctrl + N", "Ctrl + Tab", "Ctrl + O"],
+        "answer": "Ctrl + T"
+      },
+      {
+        "id": 41,
+        "question": "「Ctrl + C」でコピーした文章を、メールの本文に貼り付けます。正しい操作はどれですか？",
+        "choices": ["Ctrl + V", "Ctrl + P", "Ctrl + B", "Ctrl + Insert"],
+        "answer": "Ctrl + V"
+      },
+      {
+        "id": 42,
+        "question": "デスクトップにある「新しいテキスト ドキュメント.txt」の名前をパッと変更したいとき、ファイルを選択して押すキーはどれですか？",
+        "choices": ["F2", "F3", "F4", "F5"],
+        "answer": "F2"
+      },
+      {
+        "id": 43,
+        "question": "Webサイトの表示が崩れてしまったので、もう一度読み込み直したい（リロードしたい）です。どのキーを押しますか？",
+        "choices": ["F5", "F1", "F11", "F12"],
+        "answer": "F5"
+      },
+      {
+        "id": 44,
+        "question": "Wordとブラウザを交互に見ながら作業しています。マウスを使わずにこの2つの画面（ウィンドウ）を瞬時に切り替えるキーはどれですか？",
+        "choices": ["Alt + Tab", "Ctrl + Tab", "Windows + Tab", "Shift + Tab"],
+        "answer": "Alt + Tab"
+      },
+      {
+        "id": 45,
+        "question": "上司が後ろを通ったので、開いているウィンドウをすべて最小化して、急いでデスクトップ画面だけを表示させたいです。どのキーを押しますか？",
+        "choices": ["Windows + D", "Windows + L", "Alt + D", "Ctrl + D"],
+        "answer": "Windows + D"
+      },
+      {
+        "id": 46,
+        "question": "誤って作成中のファイルをゴミ箱に入れてしまいました。「元に戻す」操作でゴミ箱から取り出すことができるキーはどれですか？",
+        "choices": ["Ctrl + Z", "Ctrl + B", "Ctrl + R", "Ctrl + U"],
+        "answer": "Ctrl + Z"
+      },
+      {
+        "id": 47,
+        "question": "ブラウザでいくつかタブを開いているとき、右どなりのタブに表示を切り替えるショートカットキーはどれですか？",
+        "choices": ["Ctrl + Tab", "Alt + Tab", "Shift + Tab", "Windows + Tab"],
+        "answer": "Ctrl + Tab"
+      },
+      {
+        "id": 48,
+        "question": "離席するときに、PCを勝手に操作されないように画面を「ロック」するショートカットキーはどれですか？",
+        "choices": ["Windows + L", "Windows + R", "Ctrl + L", "Alt + L"],
+        "answer": "Windows + L"
+      },
+      {
+        "id": 49,
+        "question": "PCの動きが少しおかしいので「タスクマネージャー」を起動したいです。よく使われる3つのキーの同時押しはどれですか？",
+        "choices": ["Ctrl + Shift + Esc", "Ctrl + Alt + Del", "Ctrl + Windows + Enter", "Alt + Shift + Tab"],
+        "answer": "Ctrl + Shift + Esc"
+      },
+      {
+        "id": 50,
+        "question": "「コピー（Ctrl + C）」「切り取り（Ctrl + X）」「貼り付け（Ctrl + V）」など、よく使うショートカットキーが左手側に集まっている理由はどれが一番近いですか？",
+        "choices": ["右利き用として、右手でマウスを持ちながら左手で操作できるようにするため", "キーボードの構造上、左側の方が反応速度が速いため", "開発者が左利きだったため", "特に意味はない"],
+        "answer": "右利き用として、右手でマウスを持ちながら左手で操作できるようにするため"
+      }
+    ]
+  },
+  "4kyu": {
+    "id": "4kyu",
+    "title": "ショートカットキー検定 4級 (Windows版)",
+    "questionsCount": 30,
+    "passingRate": 0.8,
+    "duration": 1800,
+    "pool": []
+  },
+  "3kyu": {
+    "id": "3kyu",
+    "title": "ショートカットキー検定 3級 (Windows版)",
+    "questionsCount": 30,
+    "passingRate": 0.8,
+    "duration": 1800,
+    "pool": []
+  },
+  "2kyu": {
+    "id": "2kyu",
+    "title": "ショートカットキー検定 2級 (Windows版)",
+    "questionsCount": 30,
+    "passingRate": 0.8,
+    "duration": 1800,
+    "pool": []
+  },
+  "1kyu": {
+    "id": "1kyu",
+    "title": "ショートカットキー検定 1級 (Windows版)",
+    "questionsCount": 30,
+    "passingRate": 0.8,
+    "duration": 1800,
+    "pool": []
+  }
+}

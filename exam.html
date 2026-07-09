@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows ショートカットキー検定 CBT試験</title>
+  <!-- Google Fontsのインポート -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Firebase SDK (Compat v9) & 共通設定ファイルのロード -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase_config.js"></script>
+  <!-- 合格証書共通ライブラリのロード -->
+  <script src="js/certificate.js"></script>
+  
+  <style>
+    /* ==========================================
+       1. デザインシステム & CSS変数定義 (直角・フラットなビジネス調テーマ)
+       ========================================== */
+    :root {
+      --bg-primary: #f3f4f6; /* 事務用グレー */
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f9fafb;
+      
+      --accent-primary: #1e3a8a; /* 伝統的な濃紺 (Navy) */
+      --accent-primary-hover: #172554;
+      --accent-light: #eff6ff; /* 控えめなライトブルー */
+      
+      --success: #059669; /* 落ち着いた緑 */
+      --success-bg: #ecfdf5;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      
+      --border-color: #4b5563; /* 明確な境界線 (Slate 600) */
+      --border-light: #9ca3af; /* 明るめの境界線 (Slate 400) */
+      
+      --text-main: #111827; /* ほぼ黒 (Slate 900) */
+      --text-muted: #4b5563; /* グレー (Slate 600) */
+      
+      --font-body: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'Courier New', Courier, monospace;
+      
+      --radius-sm: 0px; /* 全ての角丸を排除 */
+      --radius-md: 0px;
+      --radius-lg: 0px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-radius: 0px !important; /* 強制的に角丸をカット */
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ヘッダー */
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 2px solid var(--accent-primary);
+      padding: 20px 24px;
+    }
+
+    .header-container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      border: 1px solid var(--text-main);
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* 堅実なカード (枠線強調、シャドウなし) */
+    .card {
+      background-color: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      padding: 40px;
+      width: 100%;
+    }
+
+    /* ボタン (フラット、直角) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 24px;
+      font-weight: 700;
+      font-size: 15px;
+      border: 2px solid var(--text-main);
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-secondary);
+      border-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-tertiary);
+    }
+
+    .btn-danger {
+      background-color: #ffffff;
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-bg);
+    }
+
+    .btn-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ==========================================
+       画面構成
+       ========================================== */
+    .screen {
+      display: none;
+      width: 100%;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* ==========================================
+       試験画面 (CBT)
+       ========================================== */
+    .exam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .exam-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background-color: var(--border-light);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--accent-primary);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    /* タイマー (直角の枠線) */
+    .timer-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid var(--border-color);
+      padding: 8px 20px;
+      background-color: var(--bg-secondary);
+    }
+
+    .timer-val {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .timer-warning {
+      border-color: var(--danger);
+      background-color: var(--danger-bg);
+    }
+    .timer-warning .timer-val {
+      color: var(--danger);
+    }
+
+    /* キーボード操作ガイド (枠線強調) */
+    .keyboard-guide-bar {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .keyboard-badge {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-bottom: 2px solid var(--text-muted);
+      padding: 2px 8px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-size: 11px;
+    }
+
+    /* 問題カード */
+    .question-card {
+      margin-bottom: 24px;
+    }
+
+    .question-num {
+      font-size: 13px;
+      color: var(--accent-primary);
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* 選択肢ボタン */
+    .choices-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .choice-btn {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 16px 24px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.1s ease;
+      width: 100%;
+      outline: none;
+    }
+
+    .choice-btn:hover {
+      background-color: var(--bg-tertiary);
+    }
+
+    .choice-btn.selected {
+      background-color: var(--accent-light);
+      border: 2px solid var(--accent-primary);
+      padding: 15px 23px; /* 枠線太さ調整 */
+    }
+
+    .choice-badge {
+      width: 28px;
+      height: 28px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .choice-btn.selected .choice-badge {
+      background-color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #ffffff;
+    }
+
+    /* 操作エリア */
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 2px solid var(--border-light);
+      padding-top: 24px;
+      margin-bottom: 32px;
+    }
+
+    /* フッターナビゲーション (直角グリッド) */
+    .nav-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      border-left: 3px solid var(--accent-primary);
+      padding-left: 8px;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 6px;
+    }
+
+    .nav-item {
+      aspect-ratio: 1;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s ease;
+    }
+
+    .nav-item:hover {
+      border-color: var(--text-main);
+      color: var(--text-main);
+      background-color: var(--bg-tertiary);
+    }
+
+    .nav-item.current {
+      border: 3px solid var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .nav-item.answered {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* ==========================================
+       結果画面
+       ========================================== */
+    .result-status {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 14px 40px;
+      border: 2px solid var(--text-main);
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .status-pass {
+      background-color: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .status-fail {
+      background-color: var(--danger-bg);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .status-msg {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    /* 結果グリッド (表形式の結合) */
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 40px;
+    }
+
+    .result-card {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      padding: 24px;
+      text-align: center;
+    }
+
+    .result-val {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .result-lbl {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* 合格証書プレビュー */
+    .certificate-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      border-top: 2px solid var(--border-light);
+      padding-top: 32px;
+      margin-top: 24px;
+    }
+
+    .certificate-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #92400e; /* Brown 800 */
+      border-bottom: 2px solid #92400e;
+      padding-bottom: 4px;
+    }
+
+    .certificate-preview-container {
+      width: 100%;
+      max-width: 550px;
+      border: 2px solid #c5a880;
+      background-color: #fdfbf7;
+    }
+
+    #certificateCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* フッター */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-light);
+      background-color: var(--bg-secondary);
+      margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+      .card {
+        padding: 24px 16px;
+      }
+      .controls-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .controls-container .btn {
+        width: 100%;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo-container">
+        <div class="logo-icon">⌘</div>
+        <div class="logo-text" id="header-title">CBT 試験画面</div>
+      </a>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main>
+    
+    <!-- 1. 試験画面 -->
+    <div id="exam-screen" class="screen active">
+      <div class="exam-header">
+        <div class="exam-progress">
+          <div class="progress-text" id="progress-text">第 1 問 / 全 30 問</div>
+          <div class="progress-bar-bg">
+            <div id="progress-bar" class="progress-bar-fill"></div>
+          </div>
+        </div>
+        
+        <div class="timer-container" id="timer-box">
+          <span class="timer-val" id="timer-val">30:00</span>
+        </div>
+        
+        <button id="quit-btn" class="btn btn-danger">中断して提出</button>
+      </div>
+
+      <!-- キーボードガイダンスバー -->
+      <div class="keyboard-guide-bar">
+        <span><strong>キーボードショートカット：</strong></span>
+        <span>選択：<span class="keyboard-badge">A</span> <span class="keyboard-badge">B</span> <span class="keyboard-badge">C</span> <span class="keyboard-badge">D</span></span>
+        <span>次へ/提出：<span class="keyboard-badge">Enter</span></span>
+        <span>問題移動：<span class="keyboard-badge">←</span> / <span class="keyboard-badge">→</span></span>
+      </div>
+
+      <div class="card question-card">
+        <div class="question-num" id="question-num-badge">QUESTION 01</div>
+        <div class="question-text" id="question-text">問題文がここに読み込まれます。</div>
+        
+        <div class="choices-container" id="choices-box">
+          <!-- 選択肢がここに生成されます -->
+        </div>
+
+        <div class="controls-container">
+          <button id="prev-btn" class="btn btn-secondary">◀ 前の問題に戻る</button>
+          <button id="next-btn" class="btn btn-primary">次の問題に進む [Enter] ▶</button>
+        </div>
+
+        <div class="navigation-section">
+          <div class="nav-section-title">問題ナビゲーション (数字クリックでジャンプ)</div>
+          <div class="nav-grid" id="nav-grid">
+            <!-- 1〜30のボタンがここに生成されます -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 結果画面 -->
+    <div id="result-screen" class="screen">
+      <div class="card">
+        <div class="result-status">
+          <div id="result-badge" class="status-badge">合否判定中</div>
+          <p class="status-msg" id="result-message">試験終了です。お疲れ様でした。</p>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-card">
+            <div class="result-val" id="result-score">0 / 30</div>
+            <div class="result-lbl">正答数</div>
+          </div>
+          <div class="result-card">
+            <div class="result-val" id="result-rate">0%</div>
+            <div class="result-lbl">正解率 (合格基準: <span id="passing-threshold">80%</span>)</div>
+          </div>
+          <div class="result-card">
+            <div class="result-val" id="result-time">00:00</div>
+            <div class="result-lbl">所要時間</div>
+          </div>
+        </div>
+
+        <!-- 合格証書エリア (合格時のみ表示) -->
+        <div id="certificate-area" class="certificate-section" style="display: none;">
+          <div class="certificate-title">
+            🏆 合格証書
+          </div>
+          <div class="certificate-preview-container">
+            <canvas id="certificateCanvas"></canvas>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: center; width: 100%;">
+            <button id="download-cert-btn" class="btn btn-primary">画像として保存</button>
+            <button id="open-pdf-btn" class="btn btn-secondary">PDFとして表示 (別窓)</button>
+            <button id="download-pdf-btn" class="btn btn-secondary">PDFとして保存</button>
+          </div>
+        </div>
+
+        <div class="action-container" style="flex-direction: column; gap: 12px; margin-top: 24px;">
+          <button id="retry-btn" class="btn btn-secondary" style="width: 100%;">公式サイトへ戻る</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- フッター -->
+  <footer>
+    &copy; 2026 ショートカットキー検定 運営事務局. All Rights Reserved.
+  </footer>
+
+  <script>
+    /* ==========================================
+       CBT アプリケーションクラス
+       ========================================== */
+    class CBTExamApp {
+      constructor() {
+        this.currentScreen = 'exam-screen';
+        this.selectedExamId = '5kyu';
+        this.candidateLastName = '';
+        this.candidateFirstName = '';
+        
+        // 試験実行時ステート
+        this.questions = [];
+        this.userAnswers = []; 
+        this.currentQuestionIndex = 0;
+        this.timeRemaining = 0;
+        this.timerInterval = null;
+        this.startTime = null;
+        this.timeTaken = 0; // 秒
+        this.examConfig = null; // 動的ロード用
+
+        // パラメータ & 氏名チェック
+        this.loadSessionAndParams();
+
+        // DOM要素のバインド & イベント登録
+        this.bindElements();
+        this.registerEvents();
+
+        // 問題データのロード後に試験開始
+        this.loadQuestions()
+          .then(() => {
+            this.initExam();
+          })
+          .catch(err => {
+            alert('問題データの読み込みに失敗しました。');
+            console.error(err);
+          });
+      }
+
+      loadSessionAndParams() {
+        // クエリパラメータの解析
+        const params = new URLSearchParams(window.location.search);
+        const grade = params.get('grade');
+        if (grade) {
+          this.selectedExamId = grade;
+        }
+
+        // セッションストレージから氏名取得
+        this.candidateLastName = sessionStorage.getItem('candidateLastName');
+        this.candidateFirstName = sessionStorage.getItem('candidateFirstName');
+
+        // 受験者情報がない場合はポータルへ強制リダイレクト
+        if (!this.candidateLastName || !this.candidateFirstName) {
+          alert('受験者情報が確認できません。ポータル画面から受験手続きを行ってください。');
+          window.location.href = `portal.html?grade=${this.selectedExamId}`;
+        }
+      }
+
+      async loadQuestions() {
+        const supportedGrades = ['5kyu', '4kyu', '3kyu', '2kyu', '1kyu'];
+        if (!supportedGrades.includes(this.selectedExamId)) {
+          this.selectedExamId = '5kyu';
+        }
+
+        try {
+          const res = await fetch(`questions/questions_${this.selectedExamId}.json`);
+          this.examConfig = await res.json();
+        } catch (err) {
+          console.warn(`級データ questions/questions/questions_${this.selectedExamId}.json のロードに失敗したため、5級のデータで代用します:`, err);
+          const res = await fetch('questions/questions_5kyu.json');
+          this.examConfig = await res.json();
+          this.examConfig.id = this.selectedExamId;
+          this.examConfig.title = this.selectedExamId === '4kyu' ? 'ショートカットキー検定 4級 (Windows版)' :
+                                  this.selectedExamId === '3kyu' ? 'ショートカットキー検定 3級 (Windows版)' :
+                                  this.selectedExamId === '2kyu' ? 'ショートカットキー検定 2級 (Windows版)' :
+                                  'ショートカットキー検定 1級 (Windows版)';
+        }
+
+        // ロードした問題プールが空の場合、5級の問題データをマージして試験可能にする (未実装級用フォールバック)
+        if (!this.examConfig.pool || this.examConfig.pool.length === 0) {
+          try {
+            const res5 = await fetch('questions/questions_5kyu.json');
+            const config5 = await res5.json();
+            this.examConfig.pool = config5.pool;
+          } catch (err) {
+            console.error('フォールバック用の5級問題データのロードに失敗しました:', err);
+          }
+        }
+      }
+
+      bindElements() {
+        // 画面
+        this.examScreen = document.getElementById('exam-screen');
+        this.resultScreen = document.getElementById('result-screen');
+        this.headerTitle = document.getElementById('header-title');
+        
+        // 試験画面
+        this.progressBar = document.getElementById('progress-bar');
+        this.progressText = document.getElementById('progress-text');
+        this.timerVal = document.getElementById('timer-val');
+        this.timerBox = document.getElementById('timer-box');
+        this.questionNumBadge = document.getElementById('question-num-badge');
+        this.questionText = document.getElementById('question-text');
+        this.choicesBox = document.getElementById('choices-box');
+        this.prevBtn = document.getElementById('prev-btn');
+        this.nextBtn = document.getElementById('next-btn');
+        this.quitBtn = document.getElementById('quit-btn');
+        this.navGrid = document.getElementById('nav-grid');
+        
+        // 結果画面
+        this.resultBadge = document.getElementById('result-badge');
+        this.resultMessage = document.getElementById('result-message');
+        this.resultScore = document.getElementById('result-score');
+        this.resultRate = document.getElementById('result-rate');
+        this.resultTime = document.getElementById('result-time');
+        this.passingThreshold = document.getElementById('passing-threshold');
+        this.certificateArea = document.getElementById('certificate-area');
+        this.certCanvas = document.getElementById('certificateCanvas');
+        this.downloadCertBtn = document.getElementById('download-cert-btn');
+        this.openPdfBtn = document.getElementById('open-pdf-btn');
+        this.downloadPdfBtn = document.getElementById('download-pdf-btn');
+        this.retryBtn = document.getElementById('retry-btn');
+      }
+
+      registerEvents() {
+        this.prevBtn.addEventListener('click', () => this.navigateQuestion(-1));
+        this.nextBtn.addEventListener('click', () => this.navigateQuestion(1));
+        this.quitBtn.addEventListener('click', () => this.confirmSubmit());
+
+        this.retryBtn.addEventListener('click', () => {
+          sessionStorage.clear();
+          window.location.href = 'index.html';
+        });
+
+        this.downloadCertBtn.addEventListener('click', () => this.downloadCertificate());
+        this.openPdfBtn.addEventListener('click', () => this.openPDFCertificate());
+        this.downloadPdfBtn.addEventListener('click', () => this.downloadPDFCertificate());
+
+        // 開発者ツール対策 (試験中のコンテキストメニュー、F12、各種DevToolsキーの無効化)
+        document.addEventListener('contextmenu', (e) => {
+          if (this.currentScreen === 'exam-screen') {
+            e.preventDefault();
+          }
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (this.currentScreen === 'exam-screen') {
+            // F12キーの無効化
+            if (e.key === 'F12' || e.keyCode === 123) {
+              e.preventDefault();
+              alert('試験中のデベロッパーツール起動は禁止されています。');
+              return false;
+            }
+            // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (DevTools起動) の無効化
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+              e.preventDefault();
+              alert('試験中のデベロッパーツール起動は禁止されています。');
+              return false;
+            }
+            // Ctrl+U (ソース表示) の無効化
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
+              e.preventDefault();
+              alert('試験中のソースコード表示は禁止されています。');
+              return false;
+            }
+            // Ctrl+S (Webページ保存) の無効化
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) {
+              e.preventDefault();
+              return false;
+            }
+          }
+        }, true);
+
+        // デバッガートラップ (F12を開いた瞬間にdebuggerでプログラムが一時停止しフリーズさせる)
+        setInterval(() => {
+          if (this.currentScreen === 'exam-screen') {
+            const start = Date.now();
+            debugger;
+            const end = Date.now();
+            if (end - start > 100) {
+              console.warn("デベロッパーツールが検出されました");
+            }
+          }
+        }, 1000);
+
+        // キーボード操作リスナー
+        window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+        // ページ離脱防止 (タブ閉じ、戻る、外部遷移)
+        window.addEventListener('beforeunload', (e) => {
+          if (this.currentScreen === 'exam-screen') {
+            e.preventDefault();
+            e.returnValue = ''; // 確認ダイアログを起動
+          }
+        });
+
+        // 別タブへの切り替え・最小化検知警告
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden' && this.currentScreen === 'exam-screen') {
+            alert('【警告】試験画面から離脱しました。試験中に他のタブを表示したり、別アプリを操作したりすることは禁止されています。');
+          }
+        });
+      }
+
+      switchScreen(screenId) {
+        this.examScreen.classList.remove('active');
+        this.resultScreen.classList.remove('active');
+        
+        document.getElementById(screenId).classList.add('active');
+        this.currentScreen = screenId;
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      shuffle(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      initExam() {
+        const config = this.examConfig;
+        this.headerTitle.textContent = config.title;
+
+        const savedQuestions = sessionStorage.getItem('examQuestions');
+        const savedAnswers = sessionStorage.getItem('examUserAnswers');
+        const savedStartTime = sessionStorage.getItem('examStartTime');
+        const savedCurrentIndex = sessionStorage.getItem('examCurrentIndex');
+
+        if (savedQuestions && savedAnswers && savedStartTime) {
+          this.questions = JSON.parse(savedQuestions);
+          this.userAnswers = JSON.parse(savedAnswers);
+          const startTimeStamp = parseInt(savedStartTime, 10);
+          this.startTime = startTimeStamp;
+
+          const elapsed = Math.floor((Date.now() - startTimeStamp) / 1000);
+          this.timeRemaining = config.duration - elapsed;
+          this.currentQuestionIndex = savedCurrentIndex ? parseInt(savedCurrentIndex, 10) : 0;
+
+          if (this.timeRemaining <= 0) {
+            alert('制限時間を超過したため、試験を終了し、解答を提出します。');
+            this.timeRemaining = 0;
+            this.submitExam();
+            return;
+          }
+        } else {
+          // 重複・連続出題を避けるためのラウンドロビン(巡回)抽出アルゴリズム
+          const groups = {};
+          config.pool.forEach(q => {
+            if (!groups[q.answer]) groups[q.answer] = [];
+            groups[q.answer].push(q);
+          });
+
+          // 各グループ(正解キー別)内の問題をシャッフル
+          Object.keys(groups).forEach(key => {
+            groups[key] = this.shuffle(groups[key]);
+          });
+
+          const selectedPool = [];
+          const groupKeys = this.shuffle(Object.keys(groups)); // キーの巡回順もランダムにシャッフル
+          let added = true;
+          
+          while (selectedPool.length < config.questionsCount && added) {
+            added = false;
+            for (const key of groupKeys) {
+              if (groups[key].length > 0) {
+                selectedPool.push(groups[key].pop());
+                added = true;
+                if (selectedPool.length === config.questionsCount) break;
+              }
+            }
+          }
+
+          this.questions = selectedPool.map(q => {
+            return {
+              id: q.id,
+              question: q.question,
+              choices: this.shuffle(q.choices),
+              answer: q.answer
+            };
+          });
+
+          this.userAnswers = new Array(config.questionsCount).fill(null);
+          this.currentQuestionIndex = 0;
+          this.timeRemaining = config.duration;
+          this.startTime = Date.now();
+
+          sessionStorage.setItem('examQuestions', JSON.stringify(this.questions));
+          sessionStorage.setItem('examUserAnswers', JSON.stringify(this.userAnswers));
+          sessionStorage.setItem('examStartTime', String(this.startTime));
+          sessionStorage.setItem('examCurrentIndex', String(this.currentQuestionIndex));
+        }
+
+        this.renderNavGrid();
+        this.showQuestion(this.currentQuestionIndex);
+        this.startTimer();
+      }
+
+      startTimer() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        
+        this.updateTimerDisplay();
+        this.timerInterval = setInterval(() => {
+          this.timeRemaining--;
+          this.updateTimerDisplay();
+          
+          if (this.timeRemaining <= 0) {
+            clearInterval(this.timerInterval);
+            alert('制限時間になりました。試験を終了し、解答を提出します。');
+            this.submitExam();
+          }
+        }, 1000);
+      }
+
+      updateTimerDisplay() {
+        const m = Math.floor(this.timeRemaining / 60);
+        const s = this.timeRemaining % 60;
+        const formatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        this.timerVal.textContent = formatted;
+
+        if (this.timeRemaining < 180) {
+          this.timerBox.classList.add('timer-warning');
+        } else {
+          this.timerBox.classList.remove('timer-warning');
+        }
+      }
+
+      showQuestion(index) {
+        this.currentQuestionIndex = index;
+        sessionStorage.setItem('examCurrentIndex', String(index));
+        const q = this.questions[index];
+        const config = this.examConfig;
+
+        const progressPercentage = ((index + 1) / config.questionsCount) * 100;
+        this.progressBar.style.width = `${progressPercentage}%`;
+        this.progressText.textContent = `第 ${index + 1} 問 / 全 ${config.questionsCount} 問`;
+
+        this.questionNumBadge.textContent = `QUESTION ${String(index + 1).padStart(2, '0')}`;
+        this.questionText.textContent = q.question;
+
+        this.choicesBox.innerHTML = '';
+        const alphabet = ['A', 'B', 'C', 'D'];
+        q.choices.forEach((choice, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-btn';
+          if (this.userAnswers[index] === choice) {
+            btn.classList.add('selected');
+          }
+
+          const badge = document.createElement('span');
+          badge.className = 'choice-badge';
+          badge.textContent = alphabet[i];
+
+          const text = document.createElement('span');
+          text.textContent = choice;
+
+          btn.appendChild(badge);
+          btn.appendChild(text);
+
+          btn.addEventListener('click', () => this.selectAnswer(index, choice));
+          this.choicesBox.appendChild(btn);
+        });
+
+        if (index === 0) {
+          this.prevBtn.classList.add('btn-disabled');
+        } else {
+          this.prevBtn.classList.remove('btn-disabled');
+        }
+
+        if (index === config.questionsCount - 1) {
+          this.nextBtn.textContent = '解答終了 (結果確認) [Enter]';
+        } else {
+          this.nextBtn.textContent = '次の問題に進む [Enter] ▶';
+        }
+
+        this.updateNavHighlight();
+      }
+
+      selectAnswer(qIndex, choiceText) {
+        this.userAnswers[qIndex] = choiceText;
+        sessionStorage.setItem('examUserAnswers', JSON.stringify(this.userAnswers));
+        
+        const buttons = this.choicesBox.querySelectorAll('.choice-btn');
+        buttons.forEach(btn => {
+          if (btn.querySelector('span:last-child').textContent === choiceText) {
+            btn.classList.add('selected');
+          } else {
+            btn.classList.remove('selected');
+          }
+        });
+
+        const navItems = this.navGrid.children;
+        if (navItems[qIndex]) {
+          navItems[qIndex].classList.add('answered');
+        }
+      }
+
+      navigateQuestion(direction) {
+        const targetIndex = this.currentQuestionIndex + direction;
+        const config = this.examConfig;
+
+        if (targetIndex >= 0 && targetIndex < config.questionsCount) {
+          this.showQuestion(targetIndex);
+        } else if (targetIndex === config.questionsCount) {
+          this.confirmSubmit();
+        }
+      }
+
+      renderNavGrid() {
+        this.navGrid.innerHTML = '';
+        this.questions.forEach((_, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'nav-item';
+          btn.textContent = i + 1;
+          btn.addEventListener('click', () => this.showQuestion(i));
+          this.navGrid.appendChild(btn);
+        });
+      }
+
+      updateNavHighlight() {
+        const navItems = this.navGrid.children;
+        Array.from(navItems).forEach((item, i) => {
+          item.classList.remove('current');
+          if (i === this.currentQuestionIndex) {
+            item.classList.add('current');
+          }
+          if (this.userAnswers[i] !== null) {
+            item.classList.add('answered');
+          } else {
+            item.classList.remove('answered');
+          }
+        });
+      }
+
+      handleKeyDown(e) {
+        if (this.currentScreen !== 'exam-screen') return;
+
+        const key = e.key.toUpperCase();
+
+        if (['A', 'B', 'C', 'D'].includes(key)) {
+          e.preventDefault();
+          const qIndex = this.currentQuestionIndex;
+          const q = this.questions[qIndex];
+          const alphabet = ['A', 'B', 'C', 'D'];
+          const choiceIndex = alphabet.indexOf(key);
+          
+          if (q.choices[choiceIndex]) {
+            this.selectAnswer(qIndex, q.choices[choiceIndex]);
+          }
+        }
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const config = this.examConfig;
+          if (this.currentQuestionIndex === config.questionsCount - 1) {
+            this.confirmSubmit();
+          } else {
+            this.navigateQuestion(1);
+          }
+        }
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          this.navigateQuestion(1);
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          this.navigateQuestion(-1);
+        }
+      }
+
+      confirmSubmit() {
+        const config = this.examConfig;
+        const answeredCount = this.userAnswers.filter(ans => ans !== null).length;
+        const unansweredCount = config.questionsCount - answeredCount;
+        
+        let msg = '本当に試験を終了して提出しますか？';
+        if (unansweredCount > 0) {
+          msg = `未解答の問題が ${unansweredCount} 問あります。\n本当に試験を終了して解答を提出しますか？`;
+        }
+
+        if (confirm(msg)) {
+          this.submitExam();
+        }
+      }
+
+      submitExam() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+
+        sessionStorage.removeItem('examQuestions');
+        sessionStorage.removeItem('examUserAnswers');
+        sessionStorage.removeItem('examStartTime');
+        sessionStorage.removeItem('examCurrentIndex');
+
+        const endTime = Date.now();
+        this.timeTaken = Math.floor((endTime - this.startTime) / 1000);
+        
+        const config = this.examConfig;
+        let correctCount = 0;
+        this.questions.forEach((q, i) => {
+          if (this.userAnswers[i] === q.answer) {
+            correctCount++;
+          }
+        });
+
+        const rate = correctCount / config.questionsCount;
+        const ratePercent = Math.round(rate * 100);
+        const isPassed = rate >= config.passingRate;
+
+        this.resultScore.textContent = `${correctCount} / ${config.questionsCount}`;
+        this.resultRate.textContent = `${ratePercent}%`;
+        this.passingThreshold.textContent = `${config.passingRate * 100}%`;
+        
+        const min = Math.floor(this.timeTaken / 60);
+        const sec = this.timeTaken % 60;
+        this.resultTime.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+
+        if (isPassed) {
+          this.resultBadge.textContent = '合格';
+          this.resultBadge.className = 'status-badge status-pass';
+          this.resultMessage.textContent = '合格おめでとうございます！優秀な成績で合格されました。';
+          
+          this.certificateArea.style.display = 'flex';
+          
+          // サーバーに合格証書発行をリクエスト
+          fetch('/api/issue-certificate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              grade: this.selectedExamId,
+              score: correctCount,
+              rate: ratePercent
+            })
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+          })
+          .then(async data => {
+            if (data.status === 'success') {
+              await this.generateCertificateGraphic(correctCount, ratePercent, data.certNo, data.date);
+            } else {
+              throw new Error('サーバー採番に失敗しました');
+            }
+          })
+          .catch(async err => {
+            console.warn('サーバー採番に失敗したため、ローカルで仮採番します:', err);
+            const today = new Date();
+            const dateString = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+            const gradeNum = this.selectedExamId.replace('kyu', '');
+            const certNumber = `No. SC-${gradeNum}-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+            await this.generateCertificateGraphic(correctCount, ratePercent, certNumber, dateString);
+          });
+        } else {
+          this.resultBadge.textContent = '不合格';
+          this.resultBadge.className = 'status-badge status-fail';
+          this.resultMessage.textContent = '残念ながら合格基準に届きませんでした。再度挑戦してください。';
+          this.certificateArea.style.display = 'none';
+        }
+
+        // 受験ログの保存 (Firebase / LocalStorage)
+        const visitorId = getOrCreateVisitorId();
+        const details = this.questions.map((q, i) => {
+          const userAns = this.userAnswers[i];
+          const isCorrect = userAns === q.answer;
+          return {
+            questionId: q.id,
+            questionText: q.question,
+            correctAnswer: q.answer,
+            userAnswer: userAns,
+            isCorrect: isCorrect
+          };
+        });
+
+        const record = {
+          visitorId: visitorId,
+          grade: this.selectedExamId,
+          gradeTitle: config.title,
+          score: correctCount,
+          totalQuestions: config.questionsCount,
+          rate: ratePercent,
+          passed: isPassed,
+          timeTaken: this.timeTaken,
+          timestamp: isFirebaseConfigured ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+          details: details
+        };
+
+        if (isFirebaseConfigured && db) {
+          db.collection("exam_records").add(record)
+            .then(() => console.log("受験ログが Firebase (Firestore) に保存されました。"))
+            .catch(err => console.error("Firebase 保存エラー:", err));
+        } else {
+          saveMockRecord(record);
+          console.log("受験ログをモック保存しました (LocalStorage):", record);
+        }
+
+        this.switchScreen('result-screen');
+      }
+
+      async generateCertificateGraphic(correctCount, ratePercent, certNo, dateDisplay) {
+        await CertificateApp.generate(this.certCanvas, {
+          score: correctCount,
+          rate: ratePercent,
+          certNo: certNo,
+          dateStr: dateDisplay,
+          gradeTitle: this.examConfig.title,
+          lastName: this.candidateLastName,
+          firstName: this.candidateFirstName
+        });
+      }
+
+      downloadCertificate() {
+        const link = document.createElement('a');
+        link.download = 'shortcut_5kyu_certificate.png';
+        link.href = this.certCanvas.toDataURL('image/png');
+        link.click();
+      }
+
+      openPDFCertificate() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+        const imgData = this.certCanvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 0, 0, 297, 210);
+        const blobUrl = doc.output('bloburl');
+        window.open(blobUrl, '_blank');
+      }
+
+      downloadPDFCertificate() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+        const imgData = this.certCanvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 0, 0, 297, 210);
+        const config = this.examConfig;
+        const gradeName = config ? config.title.replace(/\s+/g, '_') : 'certificate';
+        doc.save(`${gradeName}_certificate.pdf`);
+      }
+
+
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.examApp = new CBTExamApp();
+    });
+  </script>
+</body>
+</html>
