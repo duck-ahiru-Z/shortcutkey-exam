@@ -1,14 +1,15 @@
-// js/firebase_config.js
-// Firebase 連携用設定ファイル (JS共通フォルダ配置版)
+// js/firebase_config.example.js
+// Firebase 連携用設定ファイルのテンプレート
+// このファイルを「firebase_config.js」にコピーし、ご自身の Firebase 接続キーを記入してください。
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAuAsWLctHoBp6Eh2UN2sIM3wE1YJZIxvQ",
-  authDomain: "shortcut-key-exam.firebaseapp.com",
-  projectId: "shortcut-key-exam",
-  storageBucket: "shortcut-key-exam.firebasestorage.app",
-  messagingSenderId: "522459442819",
-  appId: "1:522459442819:web:3a390baf5d2b6e001075b6",
-  measurementId: "G-7TRX1BYWC2"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID"
 };
 
 // Firebase 設定が完了しているか（プレースホルダーのままではないか）の判定フラグ
@@ -35,7 +36,6 @@ if (isFirebaseConfigured) {
 function getOrCreateVisitorId() {
   let visitorId = localStorage.getItem('cbt_visitor_id');
   if (!visitorId) {
-    // ランダムなデバイスUUID風IDを生成 (MACアドレスの代替)
     visitorId = 'device_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
     localStorage.setItem('cbt_visitor_id', visitorId);
   }
