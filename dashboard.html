@@ -737,25 +737,46 @@
           repeaterBadge = `<span class="badge badge-repeater" title="同一人物による受験">${r.nthExam}回目の受験</span>`;
         }
 
-        const min = Math.floor(r.timeTaken / 60);
-        const sec = r.timeTaken % 60;
+        const min = Math.floor((r.timeTaken || 0) / 60);
+        const sec = (r.timeTaken || 0) % 60;
         const timeStr = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 
         const displayId = r.visitorId ? (r.visitorId.startsWith('device_') ? r.visitorId.substring(0, 16) + '...' : r.visitorId) : '不明な端末';
 
         let certBtn = '-';
         if (r.passed) {
-          const certNo = r.certNo || `No. SC-${r.grade.replace('kyu', '')}-${new Date(r.timestamp).getFullYear()}-TEMP`;
-          const dateStr = r.timestampString.split(' ')[0].replace(/\//g, '年') + '日';
+          // 安全な年取得
+          let certYear = new Date().getFullYear();
+          if (r.timestamp) {
+            if (typeof r.timestamp.toDate === 'function') {
+              try { certYear = r.timestamp.toDate().getFullYear(); } catch(e) {}
+            } else {
+              const d = new Date(r.timestamp);
+              if (!isNaN(d.getTime())) { certYear = d.getFullYear(); }
+            }
+          }
+          const gradeNum = r.grade ? r.grade.replace('kyu', '') : '5';
+          const certNo = r.certNo || `No. SC-${gradeNum}-${certYear}-TEMP`;
+          
+          // 安全な日付表示文字列の切り出し
+          let dateStr = "授与日";
+          if (r.timestampString && typeof r.timestampString === 'string') {
+            if (r.timestampString.includes(' ')) {
+              dateStr = r.timestampString.split(' ')[0].replace(/\//g, '年') + '日';
+            } else {
+              dateStr = r.timestampString;
+            }
+          }
+          
           certBtn = `<button class="btn" style="font-size:11px; padding:4px 8px; width:auto; border: 1px solid var(--border-color); background:#eff6ff;" 
-            onclick="openCertPreview('${r.score}', '${r.rate}', '${certNo}', '${dateStr}', '${r.gradeTitle}', '${r.grade}')">証書表示 📄</button>`;
+            onclick="openCertPreview('${r.score}', '${r.rate}', '${certNo}', '${dateStr}', '${escapeHtml(r.gradeTitle || "検定")}', '${r.grade || "5kyu"}')">証書表示 📄</button>`;
         }
 
         tr.innerHTML = `
-          <td>${r.timestampString}</td>
+          <td>${r.timestampString || "不明"}</td>
           <td style="font-weight: 500; font-family: monospace;">${escapeHtml(displayId)}${repeaterBadge}</td>
-          <td>${escapeHtml(r.gradeTitle)}</td>
-          <td><strong>${r.score}問</strong> (${r.rate}%)</td>
+          <td>${escapeHtml(r.gradeTitle || "不明")}</td>
+          <td><strong>${r.score || 0}問</strong> (${r.rate || 0}%)</td>
           <td><span class="badge ${r.passed ? 'badge-pass' : 'badge-fail'}">${r.passed ? '合格' : '不合格'}</span></td>
           <td>${timeStr}</td>
           <td>${certBtn}</td>
