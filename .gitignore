@@ -1,6 +1,9 @@
 # Local SQLite Database
 exam_records.db
 
+# Firebase local config (Contains sensitive API Keys)
+js/firebase_config.js
+
 # Task & Agent Logs
 .gemini/
 .agents/
