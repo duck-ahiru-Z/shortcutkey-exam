@@ -671,7 +671,9 @@
         this.examConfig = null; // 動的ロード用
 
         // パラメータ & 氏名チェック
-        this.loadSessionAndParams();
+        if (!this.loadSessionAndParams()) {
+          return;
+        }
 
         // DOM要素のバインド & イベント登録
         this.bindElements();
@@ -696,6 +698,15 @@
           this.selectedExamId = grade;
         }
 
+        // 現在公開済みの級だけを許可する。
+        // 準備中の級へ直接アクセスして5級問題を受験できる状態を防ぐ。
+        const availableGrades = ['5kyu'];
+        if (!availableGrades.includes(this.selectedExamId)) {
+          alert('選択した級は現在受験できません。公式サイトから受験可能な級を選択してください。');
+          window.location.replace('index.html');
+          return false;
+        }
+
         // セッションストレージから氏名取得
         this.candidateLastName = sessionStorage.getItem('candidateLastName');
         this.candidateFirstName = sessionStorage.getItem('candidateFirstName');
@@ -703,39 +714,22 @@
         // 受験者情報がない場合はポータルへ強制リダイレクト
         if (!this.candidateLastName || !this.candidateFirstName) {
           alert('受験者情報が確認できません。ポータル画面から受験手続きを行ってください。');
-          window.location.href = `portal.html?grade=${this.selectedExamId}`;
+          window.location.replace(`portal.html?grade=${this.selectedExamId}`);
+          return false;
         }
+
+        return true;
       }
 
       async loadQuestions() {
-        const supportedGrades = ['5kyu', '4kyu', '3kyu', '2kyu', '1kyu'];
-        if (!supportedGrades.includes(this.selectedExamId)) {
-          this.selectedExamId = '5kyu';
+        const res = await fetch(`questions/questions_${this.selectedExamId}.json`);
+        if (!res.ok) {
+          throw new Error(`問題データの取得に失敗しました (HTTP ${res.status})`);
         }
+        this.examConfig = await res.json();
 
-        try {
-          const res = await fetch(`questions/questions_${this.selectedExamId}.json`);
-          this.examConfig = await res.json();
-        } catch (err) {
-          console.warn(`級データ questions/questions/questions_${this.selectedExamId}.json のロードに失敗したため、5級のデータで代用します:`, err);
-          const res = await fetch('questions/questions_5kyu.json');
-          this.examConfig = await res.json();
-          this.examConfig.id = this.selectedExamId;
-          this.examConfig.title = this.selectedExamId === '4kyu' ? 'ショートカットキー検定 4級 (Windows版)' :
-                                  this.selectedExamId === '3kyu' ? 'ショートカットキー検定 3級 (Windows版)' :
-                                  this.selectedExamId === '2kyu' ? 'ショートカットキー検定 2級 (Windows版)' :
-                                  'ショートカットキー検定 1級 (Windows版)';
-        }
-
-        // ロードした問題プールが空の場合、5級の問題データをマージして試験可能にする (未実装級用フォールバック)
-        if (!this.examConfig.pool || this.examConfig.pool.length === 0) {
-          try {
-            const res5 = await fetch('questions/questions_5kyu.json');
-            const config5 = await res5.json();
-            this.examConfig.pool = config5.pool;
-          } catch (err) {
-            console.error('フォールバック用の5級問題データのロードに失敗しました:', err);
-          }
+        if (!Array.isArray(this.examConfig.pool) || this.examConfig.pool.length < this.examConfig.questionsCount) {
+          throw new Error('問題データが不足しています。');
         }
       }
 
