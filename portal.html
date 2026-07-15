@@ -379,10 +379,10 @@
 
       let config = null;
       try {
-        const res = await fetch(`questions_${selectedGrade}.json`);
+        const res = await fetch(`questions/questions_${selectedGrade}.json`);
         config = await res.json();
       } catch (err) {
-        alert(`問題データ（questions_${selectedGrade}.json）の読み込みに失敗しました。`);
+        alert(`問題データ（questions/questions_${selectedGrade}.json）の読み込みに失敗しました。`);
         console.error(err);
         return;
       }
