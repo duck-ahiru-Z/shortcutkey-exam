@@ -892,32 +892,16 @@
             return;
           }
         } else {
-          // 重複・連続出題を避けるためのラウンドロビン(巡回)抽出アルゴリズム
-          const groups = {};
-          config.pool.forEach(q => {
-            if (!groups[q.answer]) groups[q.answer] = [];
-            groups[q.answer].push(q);
-          });
-
-          // 各グループ(正解キー別)内の問題をシャッフル
-          Object.keys(groups).forEach(key => {
-            groups[key] = this.shuffle(groups[key]);
-          });
-
-          const selectedPool = [];
-          const groupKeys = this.shuffle(Object.keys(groups)); // キーの巡回順もランダムにシャッフル
-          let added = true;
-          
-          while (selectedPool.length < config.questionsCount && added) {
-            added = false;
-            for (const key of groupKeys) {
-              if (groups[key].length > 0) {
-                selectedPool.push(groups[key].pop());
-                added = true;
-                if (selectedPool.length === config.questionsCount) break;
-              }
-            }
+          if (!Number.isInteger(config.questionsCount) || config.questionsCount <= 0) {
+            throw new Error('出題数の設定が不正です。');
           }
+          if (!Array.isArray(config.pool) || config.pool.length < config.questionsCount) {
+            throw new Error(`問題数が不足しています（必要: ${config.questionsCount}問）。`);
+          }
+
+          // 正解文字列ごとの抽出では、小さいグループの問題ほど選ばれやすくなる。
+          // 全問題を一度シャッフルして先頭から選び、各問題の選出確率を揃える。
+          const selectedPool = this.shuffle(config.pool).slice(0, config.questionsCount);
 
           this.questions = selectedPool.map(q => {
             return {
