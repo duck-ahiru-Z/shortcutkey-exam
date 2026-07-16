@@ -503,7 +503,7 @@
     }
 
     // グローバル状態
-    let visitorCountMap = {}; // visitorId -> 受験回数
+    let visitorCountMap = new Map(); // visitorId -> 受験回数
 
     document.addEventListener('DOMContentLoaded', () => {
       initModeDisplay();
@@ -593,6 +593,22 @@
     }
 
     /**
+     * Firestore / LocalStorage由来の値をDOM表示用の文字列に正規化する
+     */
+    function toDisplayText(value, fallback = '') {
+      if (typeof value === 'string') return value;
+      if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+      return fallback;
+    }
+
+    function appendTextCell(row, text) {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      row.appendChild(cell);
+      return cell;
+    }
+
+    /**
      * 受験履歴データから統計情報を加工してレンダリング
      */
     function processAndRender(records) {
@@ -607,15 +623,17 @@
       const passedRate = Math.round((passedCount / totalCount) * 100);
 
       // 同一人物(visitorId)の集計
-      visitorCountMap = {};
+      visitorCountMap = new Map();
       const uniqueVisitors = new Set();
       // 古い順に見ていき、何回目の受験かをカウントする
       const chronological = [...records].reverse();
       chronological.forEach(r => {
-        if (r.visitorId) {
-          uniqueVisitors.add(r.visitorId);
-          visitorCountMap[r.visitorId] = (visitorCountMap[r.visitorId] || 0) + 1;
-          r.nthExam = visitorCountMap[r.visitorId]; // この受験レコードが何回目か
+        const visitorId = toDisplayText(r && r.visitorId);
+        if (visitorId) {
+          uniqueVisitors.add(visitorId);
+          const examCount = (visitorCountMap.get(visitorId) || 0) + 1;
+          visitorCountMap.set(visitorId, examCount);
+          r.nthExam = examCount; // この受験レコードが何回目か
         }
       });
 
@@ -629,53 +647,67 @@
       const gradeCounts = { '5kyu': 0, '4kyu': 0, '3kyu': 0, '2kyu': 0, '1kyu': 0 };
       const gradeTitles = { '5kyu': '5級', '4kyu': '4級', '3kyu': '3級', '2kyu': '2級', '1kyu': '1級' };
       records.forEach(r => {
-        if (gradeCounts[r.grade] !== undefined) {
-          gradeCounts[r.grade]++;
+        const grade = toDisplayText(r && r.grade);
+        if (Object.hasOwn(gradeCounts, grade)) {
+          gradeCounts[grade]++;
         }
       });
 
       const gradeChart = document.getElementById('grade-chart');
-      gradeChart.innerHTML = '';
+      gradeChart.replaceChildren();
       Object.keys(gradeCounts).forEach(grade => {
         const count = gradeCounts[grade];
         const pct = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
-        
+
         const row = document.createElement('div');
         row.className = 'bar-row';
-        row.innerHTML = `
-          <div class="bar-label">${gradeTitles[grade]}</div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width: ${pct}%;"></div>
-          </div>
-          <div class="bar-value">${count}人 (${pct}%)</div>
-        `;
+
+        const label = document.createElement('div');
+        label.className = 'bar-label';
+        label.textContent = gradeTitles[grade];
+
+        const track = document.createElement('div');
+        track.className = 'bar-track';
+
+        const fill = document.createElement('div');
+        fill.className = 'bar-fill';
+        fill.style.width = `${pct}%`;
+        track.appendChild(fill);
+
+        const value = document.createElement('div');
+        value.className = 'bar-value';
+        value.textContent = `${count}人 (${pct}%)`;
+
+        row.append(label, track, value);
         gradeChart.appendChild(row);
       });
 
       // 3. 問題別正答率の集計
-      const qStats = {}; // questionId -> { text, answer, correctCount, totalCount }
+      const qStats = new Map(); // questionId -> { text, answer, correctCount, totalCount }
       records.forEach(r => {
         if (r.details && Array.isArray(r.details)) {
           r.details.forEach(d => {
-            const qId = d.questionId;
-            if (!qStats[qId]) {
-              qStats[qId] = {
-                text: d.questionText,
-                answer: d.correctAnswer,
+            if (!d || typeof d !== 'object') return;
+
+            const qId = toDisplayText(d.questionId, '不明');
+            if (!qStats.has(qId)) {
+              qStats.set(qId, {
+                text: toDisplayText(d.questionText, '不明'),
+                answer: toDisplayText(d.correctAnswer, '不明'),
                 correctCount: 0,
                 totalCount: 0
-              };
+              });
             }
-            qStats[qId].totalCount++;
+            const stats = qStats.get(qId);
+            stats.totalCount++;
             if (d.isCorrect) {
-              qStats[qId].correctCount++;
+              stats.correctCount++;
             }
           });
         }
       });
 
-      const qList = Object.keys(qStats).map(qId => {
-        const s = qStats[qId];
+      const qList = Array.from(qStats, ([qId, s]) => {
         return {
           id: qId,
           text: s.text,
@@ -690,8 +722,8 @@
       qList.sort((a, b) => a.rate - b.rate);
 
       const rankingBody = document.getElementById('question-ranking-body');
-      rankingBody.innerHTML = '';
-      
+      rankingBody.replaceChildren();
+
       // ワースト10問を表示
       const worstCount = Math.min(qList.length, 10);
       for (let i = 0; i < worstCount; i++) {
@@ -702,46 +734,82 @@
         const barClass = isLow ? 'mini-bar-fill mini-bar-fill-low' : 'mini-bar-fill';
         const rankClass = i === 0 ? 'badge-rank badge-rank-1' : 'badge-rank';
 
-        tr.innerHTML = `
-          <td><span class="${rankClass}">${i + 1}</span></td>
-          <td style="font-weight:500;">${escapeHtml(q.text)}</td>
-          <td>
-            <div class="mini-bar-track">
-              <div class="${barClass}" style="width: ${q.rate}%;"></div>
-            </div>
-            <span style="font-weight:bold; color: ${isLow ? 'var(--danger)' : 'var(--success)'};">${q.rate}%</span>
-          </td>
-          <td>${q.correct} / ${q.total}</td>
-          <td><span class="badge" style="background:#f1f5f9;">${escapeHtml(q.answer)}</span></td>
-        `;
+        const rankCell = document.createElement('td');
+        const rankBadge = document.createElement('span');
+        rankBadge.className = rankClass;
+        rankBadge.textContent = String(i + 1);
+        rankCell.appendChild(rankBadge);
+        tr.appendChild(rankCell);
+
+        const questionCell = appendTextCell(tr, q.text);
+        questionCell.style.fontWeight = '500';
+
+        const rateCell = document.createElement('td');
+        const miniTrack = document.createElement('div');
+        miniTrack.className = 'mini-bar-track';
+        const miniFill = document.createElement('div');
+        miniFill.className = barClass;
+        miniFill.style.width = `${q.rate}%`;
+        miniTrack.appendChild(miniFill);
+        const rateLabel = document.createElement('span');
+        rateLabel.style.fontWeight = 'bold';
+        rateLabel.style.color = isLow ? 'var(--danger)' : 'var(--success)';
+        rateLabel.textContent = `${q.rate}%`;
+        rateCell.append(miniTrack, rateLabel);
+
+        const countCell = document.createElement('td');
+        countCell.textContent = `${q.correct} / ${q.total}`;
+
+        const answerCell = document.createElement('td');
+        const answerBadge = document.createElement('span');
+        answerBadge.className = 'badge';
+        answerBadge.style.background = '#f1f5f9';
+        answerBadge.textContent = q.answer;
+        answerCell.appendChild(answerBadge);
+
+        tr.append(rateCell, countCell, answerCell);
         rankingBody.appendChild(tr);
       }
 
       if (qList.length === 0) {
-        rankingBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">出題ログ情報がデータベースに含まれていません。</td></tr>`;
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.style.textAlign = 'center';
+        td.style.color = 'var(--text-muted)';
+        td.textContent = '出題ログ情報がデータベースに含まれていません。';
+        tr.appendChild(td);
+        rankingBody.appendChild(tr);
       }
 
       // 4. 受験履歴テーブルの描画
       const logBody = document.getElementById('log-table-body');
-      logBody.innerHTML = '';
+      logBody.replaceChildren();
 
       records.forEach(r => {
         const tr = document.createElement('tr');
-        
+
+        const visitorId = toDisplayText(r.visitorId);
+
         // 同一人物リピート検知用のバッジ
-        let repeaterBadge = '';
+        let repeaterBadge = null;
         // そのvisitorId全体の受験回数が2回以上の場合、このレコードの回数をバッジ表示
-        if (r.visitorId && visitorCountMap[r.visitorId] > 1) {
-          repeaterBadge = `<span class="badge badge-repeater" title="同一人物による受験">${r.nthExam}回目の受験</span>`;
+        if (visitorId && visitorCountMap.get(visitorId) > 1) {
+          repeaterBadge = document.createElement('span');
+          repeaterBadge.className = 'badge badge-repeater';
+          repeaterBadge.title = '同一人物による受験';
+          repeaterBadge.textContent = `${r.nthExam}回目の受験`;
         }
 
-        const min = Math.floor((r.timeTaken || 0) / 60);
-        const sec = (r.timeTaken || 0) % 60;
+        const rawTimeTaken = Number(r.timeTaken);
+        const timeTaken = Number.isFinite(rawTimeTaken) && rawTimeTaken >= 0 ? Math.floor(rawTimeTaken) : 0;
+        const min = Math.floor(timeTaken / 60);
+        const sec = timeTaken % 60;
         const timeStr = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 
-        const displayId = r.visitorId ? (r.visitorId.startsWith('device_') ? r.visitorId.substring(0, 16) + '...' : r.visitorId) : '不明な端末';
+        const displayId = visitorId ? (visitorId.startsWith('device_') ? visitorId.substring(0, 16) + '...' : visitorId) : '不明な端末';
 
-        let certBtn = '-';
+        let certBtn = null;
         if (r.passed) {
           // 安全な年取得
           let certYear = new Date().getFullYear();
@@ -753,32 +821,74 @@
               if (!isNaN(d.getTime())) { certYear = d.getFullYear(); }
             }
           }
-          const gradeNum = r.grade ? r.grade.replace('kyu', '') : '5';
-          const certNo = r.certNo || `No. SC-${gradeNum}-${certYear}-TEMP`;
+          const gradeId = toDisplayText(r.grade) || '5kyu';
+          const gradeNum = gradeId.replace('kyu', '') || '5';
+          const certNo = toDisplayText(r.certNo) || `No. SC-${gradeNum}-${certYear}-TEMP`;
           
           // 安全な日付表示文字列の切り出し
           let dateStr = "授与日";
-          if (r.timestampString && typeof r.timestampString === 'string') {
-            if (r.timestampString.includes(' ')) {
-              dateStr = r.timestampString.split(' ')[0].replace(/\//g, '年') + '日';
+          const timestampString = toDisplayText(r.timestampString);
+          if (timestampString) {
+            if (timestampString.includes(' ')) {
+              dateStr = timestampString.split(' ')[0].replace(/\//g, '年') + '日';
             } else {
-              dateStr = r.timestampString;
+              dateStr = timestampString;
             }
           }
-          
-          certBtn = `<button class="btn" style="font-size:11px; padding:4px 8px; width:auto; border: 1px solid var(--border-color); background:#eff6ff;" 
-            onclick="openCertPreview('${r.score}', '${r.rate}', '${certNo}', '${dateStr}', '${escapeHtml(r.gradeTitle || "検定")}', '${r.grade || "5kyu"}')">証書表示 📄</button>`;
+
+          certBtn = document.createElement('button');
+          certBtn.type = 'button';
+          certBtn.className = 'btn';
+          certBtn.style.fontSize = '11px';
+          certBtn.style.padding = '4px 8px';
+          certBtn.style.width = 'auto';
+          certBtn.style.border = '1px solid var(--border-color)';
+          certBtn.style.background = '#eff6ff';
+          certBtn.textContent = '証書表示 📄';
+          certBtn.addEventListener('click', () => {
+            openCertPreview(
+              toDisplayText(r.score) || '0',
+              toDisplayText(r.rate) || '0',
+              certNo,
+              dateStr,
+              toDisplayText(r.gradeTitle) || '検定',
+              gradeId
+            );
+          });
         }
 
-        tr.innerHTML = `
-          <td>${r.timestampString || "不明"}</td>
-          <td style="font-weight: 500; font-family: monospace;">${escapeHtml(displayId)}${repeaterBadge}</td>
-          <td>${escapeHtml(r.gradeTitle || "不明")}</td>
-          <td><strong>${r.score || 0}問</strong> (${r.rate || 0}%)</td>
-          <td><span class="badge ${r.passed ? 'badge-pass' : 'badge-fail'}">${r.passed ? '合格' : '不合格'}</span></td>
-          <td>${timeStr}</td>
-          <td>${certBtn}</td>
-        `;
+        appendTextCell(tr, toDisplayText(r.timestampString) || '不明');
+
+        const visitorCell = appendTextCell(tr, displayId);
+        visitorCell.style.fontWeight = '500';
+        visitorCell.style.fontFamily = 'monospace';
+        if (repeaterBadge) visitorCell.appendChild(repeaterBadge);
+
+        appendTextCell(tr, toDisplayText(r.gradeTitle) || '不明');
+
+        const scoreCell = document.createElement('td');
+        const score = document.createElement('strong');
+        score.textContent = `${toDisplayText(r.score) || '0'}問`;
+        scoreCell.append(score, document.createTextNode(` (${toDisplayText(r.rate) || '0'}%)`));
+        tr.appendChild(scoreCell);
+
+        const resultCell = document.createElement('td');
+        const resultBadge = document.createElement('span');
+        resultBadge.className = `badge ${r.passed ? 'badge-pass' : 'badge-fail'}`;
+        resultBadge.textContent = r.passed ? '合格' : '不合格';
+        resultCell.appendChild(resultBadge);
+        tr.appendChild(resultCell);
+
+        appendTextCell(tr, timeStr);
+
+        const certificateCell = document.createElement('td');
+        if (certBtn) {
+          certificateCell.appendChild(certBtn);
+        } else {
+          certificateCell.textContent = '-';
+        }
+        tr.appendChild(certificateCell);
+
         logBody.appendChild(tr);
       });
     }
