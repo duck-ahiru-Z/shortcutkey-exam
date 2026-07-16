@@ -40,11 +40,11 @@ if (isFirebaseConfigured) {
  * 同一ブラウザを識別するためのユニークな Visitor ID を取得または生成します。
  */
 function getOrCreateVisitorId() {
-  let visitorId = localStorage.getItem('cbt_visitor_id');
+  let visitorId = localStorage.getItem('ibt_visitor_id') || localStorage.getItem('cbt_visitor_id');
   if (!visitorId) {
     visitorId = 'device_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
-    localStorage.setItem('cbt_visitor_id', visitorId);
   }
+  localStorage.setItem('ibt_visitor_id', visitorId);
   return visitorId;
 }
 
@@ -54,17 +54,17 @@ function getOrCreateVisitorId() {
 function saveMockRecord(record) {
   let records = [];
   try {
-    records = JSON.parse(localStorage.getItem('cbt_mock_records') || '[]');
+    records = JSON.parse(localStorage.getItem('ibt_mock_records') || localStorage.getItem('cbt_mock_records') || '[]');
   } catch (e) {
     records = [];
   }
   records.push(record);
-  localStorage.setItem('cbt_mock_records', JSON.stringify(records));
+  localStorage.setItem('ibt_mock_records', JSON.stringify(records));
 }
 
 function getMockRecords() {
   try {
-    return JSON.parse(localStorage.getItem('cbt_mock_records') || '[]');
+    return JSON.parse(localStorage.getItem('ibt_mock_records') || localStorage.getItem('cbt_mock_records') || '[]');
   } catch (e) {
     return [];
   }

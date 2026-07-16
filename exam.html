@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Windows ショートカットキー検定 CBT試験</title>
+  <title>Windows ショートカットキー検定 IBT試験</title>
   <!-- Google Fontsのインポート -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -188,7 +188,7 @@
     }
 
     /* ==========================================
-       試験画面 (CBT)
+       試験画面 (IBT)
        ========================================== */
     .exam-header {
       display: flex;
@@ -543,7 +543,7 @@
     <div class="header-container">
       <a href="index.html" class="logo-container">
         <div class="logo-icon">⌘</div>
-        <div class="logo-text" id="header-title">CBT 試験画面</div>
+        <div class="logo-text" id="header-title">IBT 試験画面</div>
       </a>
     </div>
   </header>
@@ -651,9 +651,9 @@
 
   <script>
     /* ==========================================
-       CBT アプリケーションクラス
+       IBT アプリケーションクラス
        ========================================== */
-    class CBTExamApp {
+    class IBTExamApp {
       constructor() {
         this.currentScreen = 'exam-screen';
         this.selectedExamId = '5kyu';
@@ -1301,7 +1301,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      window.examApp = new CBTExamApp();
+      window.examApp = new IBTExamApp();
     });
   </script>
 </body>

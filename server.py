@@ -100,7 +100,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     init_db()
-    print(f"Starting custom CBT server on port {PORT}...")
+    print(f"Starting custom IBT server on port {PORT}...")
     server_address = ('', PORT)
     httpd = http.server.HTTPServer(server_address, CustomHandler)
     httpd.serve_forever()

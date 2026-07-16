@@ -539,12 +539,12 @@
             return svg;
         }
 
-        // CBTシステム組み込み用JavaScriptスニペット表示の同期更新
+        // IBTシステム組み込み用JavaScriptスニペット表示の同期更新
         function updateCodeOutput() {
             const code = `// ==========================================
-// ショートカットキー検定 CBTシステム用スタンプ描画関数 (動的生成 v3)
+// ショートカットキー検定 IBTシステム用スタンプ描画関数 (動的生成 v3)
 // ==========================================
-function drawStampCBT(canvasId, options = {}) {
+function drawStampIBT(canvasId, options = {}) {
     const canvas = document.getElementById(canvasId);
     const ctx = canvas.getContext('2d');
     const w = canvas.width; // 800pxベース設計
@@ -665,7 +665,7 @@ function drawStampCBT(canvasId, options = {}) {
             const svgString = buildSVGSource();
             const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
             const link = document.createElement('a');
-            link.download = `cbt-shortcut-stamp-${params.centerText.value}.svg`;
+            link.download = `ibt-shortcut-stamp-${params.centerText.value}.svg`;
             link.href = URL.createObjectURL(blob);
             link.click();
         });
@@ -673,7 +673,7 @@ function drawStampCBT(canvasId, options = {}) {
         // PNG保存ボタンアクション
         document.getElementById('btnDownloadPNG').addEventListener('click', () => {
             const link = document.createElement('a');
-            link.download = `cbt-shortcut-stamp-${params.centerText.value}.png`;
+            link.download = `ibt-shortcut-stamp-${params.centerText.value}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
