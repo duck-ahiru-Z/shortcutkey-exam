@@ -372,14 +372,22 @@
       const params = new URLSearchParams(window.location.search);
       let selectedGrade = params.get('grade') || '5kyu';
 
-      const supportedGrades = ['5kyu', '4kyu', '3kyu', '2kyu', '1kyu'];
-      if (!supportedGrades.includes(selectedGrade)) {
-        selectedGrade = '5kyu';
+      // 現在公開済みの級だけを受験可能にする。
+      // 未公開級を5級へ置き換えると、別の級名で5級問題を受験できてしまうため、
+      // 不正なURLや準備中の級は公式サイトへ戻す。
+      const availableGrades = ['5kyu'];
+      if (!availableGrades.includes(selectedGrade)) {
+        alert('選択した級は現在受験できません。公式サイトから受験可能な級を選択してください。');
+        window.location.replace('index.html');
+        return;
       }
 
       let config = null;
       try {
         const res = await fetch(`questions_${selectedGrade}.json`);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
         config = await res.json();
       } catch (err) {
         alert(`問題データ（questions_${selectedGrade}.json）の読み込みに失敗しました。`);
