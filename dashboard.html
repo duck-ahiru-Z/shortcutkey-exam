@@ -486,22 +486,20 @@
   </div>
 
   <script>
-    // === 管理者認証 (簡易パスコード保護) ===
-    const ADMIN_PASS = "shortcut-admin";
-    if (sessionStorage.getItem('dashboard_auth') !== 'true') {
-      const inputPass = prompt("管理者用パスコードを入力してください:");
-      if (inputPass === ADMIN_PASS) {
-        sessionStorage.setItem('dashboard_auth', 'true');
-      } else {
-        alert("パスコードが正しくありません。アクセスを拒否します。");
-        document.body.innerHTML = `
-          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#f1f5f9; color:#0f172a; font-family:sans-serif; text-align:center; padding:20px;">
-            <h1 style="font-size:24px; margin-bottom:12px; font-weight:900;">アクセス拒否</h1>
-            <p style="color:#475569; font-size:14px;">正しいパスコードを入力してページをリロードしてください。</p>
-          </div>
-        `;
-        throw new Error("Unauthorized access");
-      }
+    (() => {
+    // 公開JavaScriptにパスワードを置いても閲覧者から隠せないため、
+    // 認証基盤が整うまでは管理画面をローカルHTTP環境だけで提供する。
+    // これはUIの公開停止であり、Firestore自体はSecurity Rulesで保護する必要がある。
+    const localDashboardHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
+    if (!localDashboardHosts.has(window.location.hostname)) {
+      document.body.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#f1f5f9; color:#0f172a; font-family:sans-serif; text-align:center; padding:20px;">
+          <h1 style="font-size:24px; margin-bottom:12px; font-weight:900;">管理画面は公開環境で無効です</h1>
+          <p style="color:#475569; font-size:14px; max-width:560px; line-height:1.8;">管理者認証とFirestore Security Rulesが設定されるまで、この画面はlocalhostからのみ利用できます。</p>
+          <a href="index.html" style="margin-top:20px; color:#1e3a8a; font-weight:700;">試験サイトへ戻る</a>
+        </div>
+      `;
+      return;
     }
 
     // グローバル状態
@@ -864,7 +862,10 @@
         .replace(/'/g, "&#039;");
     }
 
+    // 動的に生成する証書ボタンのonclickから呼び出せるよう公開する。
+    window.openCertPreview = openCertPreview;
 
+    })();
   </script>
 </body>
 </html>
