@@ -669,6 +669,8 @@
         this.startTime = null;
         this.timeTaken = 0; // 秒
         this.examConfig = null; // 動的ロード用
+        this.isConfirming = false;
+        this.isSubmitting = false;
 
         // パラメータ & 氏名チェック
         if (!this.loadSessionAndParams()) {
@@ -1028,6 +1030,8 @@
       }
 
       navigateQuestion(direction) {
+        if (this.isSubmitting) return;
+
         const targetIndex = this.currentQuestionIndex + direction;
         const config = this.examConfig;
 
@@ -1067,6 +1071,12 @@
       handleKeyDown(e) {
         if (this.currentScreen !== 'exam-screen') return;
 
+        // 長押しによる連続移動・確認ダイアログの連続表示を防ぐ
+        if (e.repeat && ['Enter', 'ArrowRight', 'ArrowLeft'].includes(e.key)) {
+          e.preventDefault();
+          return;
+        }
+
         const key = e.key.toUpperCase();
 
         if (['A', 'B', 'C', 'D'].includes(key)) {
@@ -1102,6 +1112,10 @@
       }
 
       confirmSubmit() {
+        // クリック・Enter・矢印キーから確認処理が重複して開始されるのを防ぐ
+        if (this.isConfirming || this.isSubmitting) return;
+        this.isConfirming = true;
+
         const config = this.examConfig;
         const answeredCount = this.userAnswers.filter(ans => ans !== null).length;
         const unansweredCount = config.questionsCount - answeredCount;
@@ -1111,13 +1125,24 @@
           msg = `未解答の問題が ${unansweredCount} 問あります。\n本当に試験を終了して解答を提出しますか？`;
         }
 
-        if (confirm(msg)) {
-          this.submitExam();
+        try {
+          if (confirm(msg)) {
+            this.submitExam();
+          }
+        } finally {
+          this.isConfirming = false;
         }
       }
 
       submitExam() {
-        if (this.timerInterval) clearInterval(this.timerInterval);
+        // クリック・キーボード・時間切れが重なっても提出処理は一度だけ実行する
+        if (this.isSubmitting) return;
+        this.isSubmitting = true;
+
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          this.timerInterval = null;
+        }
 
         sessionStorage.removeItem('examQuestions');
         sessionStorage.removeItem('examUserAnswers');
