@@ -533,8 +533,9 @@
      */
     function loadDashboardData() {
       if (isFirebaseConfigured && db) {
-        // Firebase Firestoreから直近100件のみを取得して読み込み回数(Read)を劇的に削減します (最大100Read制限)
-        db.collection("exam_records").limit(100).get()
+        // Firestore側で日時の降順を確定してから100件に絞り、全件中の最新100件を取得する
+        // timestampフィールドがないレコードはorderByの対象外となるため、保存時にtimestampを必須とする
+        db.collection("exam_records").orderBy("timestamp", "desc").limit(100).get()
           .then(querySnapshot => {
             const records = [];
             querySnapshot.forEach(doc => {
@@ -565,19 +566,25 @@
                   const date = data.timestamp.toDate();
                   data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
                 } catch(e) {
-                  data.timestampString = "処理中...";
+                  data.timestampString = "日時不明";
                 }
               } else {
-                const date = new Date(data.timestamp || Date.now());
-                data.timestampString = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                const date = new Date(data.timestamp);
+                data.timestampString = data.timestamp && !isNaN(date.getTime())
+                  ? `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+                  : "日時不明";
               }
             });
 
+            initModeDisplay();
             processAndRender(records);
           })
           .catch(err => {
-            console.error("Firestoreデータ取得に失敗したためモックを表示します:", err);
-            processAndRender(getMockRecords());
+            console.error("Firestoreデータ取得に失敗しました:", err);
+            const monitor = document.getElementById('mode-monitor');
+            monitor.textContent = "▲ Firebaseからデータを取得できませんでした。時間をおいて再度更新してください";
+            monitor.className = "mode-badge";
+            processAndRender([]);
           });
       } else {
         // ローカルモック
