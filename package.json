@@ -1,0 +1,7 @@
+{
+  "name": "shortcutkey-exam",
+  "private": true,
+  "scripts": {
+    "validate": "node scripts/validate.mjs"
+  }
+}
