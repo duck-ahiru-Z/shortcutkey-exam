@@ -1123,6 +1123,10 @@
         sessionStorage.removeItem('examUserAnswers');
         sessionStorage.removeItem('examStartTime');
         sessionStorage.removeItem('examCurrentIndex');
+        // 結果画面を再読み込みした際に、新しい試験として再開されるのを防ぐ。
+        // 証書生成にはインスタンス上の氏名を使うため、表示中の操作には影響しない。
+        sessionStorage.removeItem('candidateLastName');
+        sessionStorage.removeItem('candidateFirstName');
 
         const endTime = Date.now();
         this.timeTaken = Math.floor((endTime - this.startTime) / 1000);
